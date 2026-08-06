@@ -1,0 +1,156 @@
+/* ============================================
+   博客页面样式
+   ============================================ */
+
+.blog-page-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    display: flex;
+    gap: 32px;
+}
+
+/* 博客列表区域 */
+.blog-list-section {
+    flex: 1;
+    min-width: 0;
+    /* 单独显示时（未打开详情）限制宽度并居中，与关于我页一致 */
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.blog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.blog-list .blog-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.blog-list .blog-card .card-info {
+    flex: 1;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+}
+
+.blog-list .blog-card .card-title {
+    margin-bottom: 4px;
+}
+
+.blog-list .blog-card .card-excerpt {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+}
+
+.blog-list .blog-card .card-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* 博客详情区域 */
+.blog-detail-section {
+    flex: 2;
+    min-width: 0;
+}
+
+.blog-detail-inner {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 0;
+    margin-bottom: 20px;
+    transition: opacity var(--transition);
+}
+
+.back-btn:hover {
+    opacity: 0.7;
+}
+
+.back-btn .icon {
+    width: 18px;
+    height: 18px;
+}
+
+.blog-article {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 32px 36px;
+}
+
+.blog-article .article-header {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.blog-article .article-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+
+.blog-article .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.blog-article .article-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.blog-article .article-meta .icon {
+    width: 15px;
+    height: 15px;
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+    .blog-page-container {
+        flex-direction: column;
+    }
+
+    .comment-sidebar {
+        position: relative;
+        top: auto;
+        width: 100%;
+        max-height: none;
+        margin-top: 24px;
+    }
+
+    .comment-list {
+        max-height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .blog-article {
+        padding: 20px;
+    }
+}

@@ -1,0 +1,53 @@
+[
+    {
+        "id": "tut-folder-1",
+        "name": "前端基础",
+        "type": "folder",
+        "children": [
+            {
+                "id": "tut-1-1",
+                "name": "HTML 入门",
+                "type": "article",
+                "file": "frontend-basics/01-html-intro.md"
+            },
+            {
+                "id": "tut-1-2",
+                "name": "CSS 选择器详解",
+                "type": "article",
+                "file": "frontend-basics/02-css-selectors.md"
+            }
+        ]
+    },
+    {
+        "id": "tut-folder-2",
+        "name": "JavaScript",
+        "type": "folder",
+        "children": [
+            {
+                "id": "tut-folder-2-1",
+                "name": "ES6+ 新特性",
+                "type": "folder",
+                "children": [
+                    {
+                        "id": "tut-2-1-1",
+                        "name": "箭头函数与模板字符串",
+                        "type": "article",
+                        "file": "javascript/es6/01-arrow-template.md"
+                    },
+                    {
+                        "id": "tut-2-1-2",
+                        "name": "解构赋值与展开运算符",
+                        "type": "article",
+                        "file": "javascript/es6/02-destructuring.md"
+                    }
+                ]
+            },
+            {
+                "id": "tut-2-2",
+                "name": "DOM 操作基础",
+                "type": "article",
+                "file": "javascript/01-dom-basics.md"
+            }
+        ]
+    }
+]

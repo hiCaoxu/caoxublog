@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CaoxuBlog 博客文章列表，包含前端技术分享和开发经验总结">
+    <title>CaoxuBlog - 博客</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/blog.css">
+    <link rel="stylesheet" href="css/mouse-trail.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                CaoxuBlog
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="blog.html" class="active">博客</a></li>
+                <li><a href="tutorial.html">教程</a></li>
+                <li><a href="about.html">关于我</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <main class="blog-page-container" id="blogPageContainer">
+        <!-- 博客列表 -->
+        <section class="blog-list-section" id="blogListSection">
+            <h2 class="section-title">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                全部博客
+            </h2>
+            <div class="blog-list" id="blogList"></div>
+            <p class="empty-hint" id="blogEmpty">暂无博客</p>
+        </section>
+
+        <!-- 博客详情区域 -->
+        <section class="blog-detail-section" id="blogDetail" style="display:none;">
+            <div class="blog-detail-inner">
+                <button class="back-btn" onclick="closeBlogDetail()">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+                    </svg>
+                    返回列表
+                </button>
+                <article class="blog-article" id="blogArticleContent"></article>
+            </div>
+        </section>
+
+        <!-- 评论区 -->
+        <aside class="comment-sidebar" id="commentSidebar" style="display:none;">
+            <h3 class="comment-title">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                访客评论
+            </h3>
+            <div class="comment-list" id="commentList"></div>
+            <div class="comment-form">
+                <input type="text" id="commentNickname" placeholder="昵称（选填）" maxlength="20" aria-label="昵称">
+                <textarea id="commentContent" placeholder="写下你的评论..." rows="3" aria-label="评论内容"></textarea>
+                <button class="btn-primary" onclick="submitComment()">发表评论</button>
+            </div>
+        </aside>
+    </main>
+
+    <!-- 鼠标移动特效 -->
+    <div class="mouse-trail-container" id="mouseTrail"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/mouse-trail.js"></script>
+    <script src="js/blog.js"></script>
+</body>
+</html>

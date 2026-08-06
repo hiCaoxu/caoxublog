@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CaoxuBlog - 简约清新的个人静态博客，分享前端技术、CSS技巧、JavaScript实践等内容">
+    <title>CaoxuBlog - 首页</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mouse-trail.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                CaoxuBlog
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">首页</a></li>
+                <li><a href="blog.html">博客</a></li>
+                <li><a href="tutorial.html">教程</a></li>
+                <li><a href="about.html">关于我</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <main class="container">
+        <!-- 置顶博客区域 -->
+        <section class="pinned-section" id="pinnedSection">
+            <h2 class="section-title">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                </svg>
+                置顶博客
+            </h2>
+            <div class="blog-grid" id="pinnedBlogs"></div>
+            <p class="empty-hint" id="pinnedEmpty">暂无置顶博客</p>
+        </section>
+
+        <!-- 最新博客区域 -->
+        <section class="latest-section">
+            <h2 class="section-title">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                最新博客
+            </h2>
+            <div class="blog-grid" id="latestBlogs"></div>
+            <p class="empty-hint" id="latestEmpty">暂无博客</p>
+        </section>
+    </main>
+
+    <!-- 鼠标移动特效 -->
+    <div class="mouse-trail-container" id="mouseTrail"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/mouse-trail.js"></script>
+    <script src="js/home.js"></script>
+</body>
+</html>

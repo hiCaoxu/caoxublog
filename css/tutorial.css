@@ -1,0 +1,178 @@
+/* ============================================
+   教程页面样式
+   ============================================ */
+
+.tutorial-page-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    display: flex;
+    gap: 32px;
+}
+
+/* 左侧目录树 */
+.tutorial-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    height: fit-content;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    position: sticky;
+    top: 84px;
+}
+
+.sidebar-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.sidebar-title .icon {
+    width: 18px;
+    height: 18px;
+    color: var(--accent);
+}
+
+/* 文件夹树 */
+.folder-tree {
+    font-size: 0.875rem;
+}
+
+.folder-tree .tree-folder {
+    margin-bottom: 2px;
+}
+
+.folder-tree .folder-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition);
+    color: var(--text-primary);
+    font-weight: 500;
+    user-select: none;
+}
+
+.folder-tree .folder-header:hover {
+    background: var(--bg-hover);
+}
+
+.folder-tree .folder-header .icon {
+    width: 16px;
+    height: 16px;
+    color: var(--accent);
+    transition: transform var(--transition);
+}
+
+.folder-tree .folder-header.collapsed .icon-folder {
+    transform: rotate(-90deg);
+}
+
+.folder-tree .folder-children {
+    padding-left: 20px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.folder-tree .folder-children.collapsed {
+    max-height: 0 !important;
+}
+
+.folder-tree .tree-article {
+    display: block;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-size: 0.84rem;
+}
+
+.folder-tree .tree-article:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.folder-tree .tree-article.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+}
+
+/* 正文区域 */
+.tutorial-content {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 36px 40px;
+}
+
+.tutorial-content .tutorial-article {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.tutorial-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    color: var(--text-muted);
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.tutorial-placeholder p {
+    font-size: 0.95rem;
+}
+
+.tutorial-article .article-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-color);
+    letter-spacing: -0.3px;
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+    .tutorial-page-container {
+        flex-direction: column;
+    }
+
+    .tutorial-sidebar {
+        width: 100%;
+        position: static;
+        max-height: none;
+    }
+
+    .comment-sidebar {
+        position: relative;
+        top: auto;
+        width: 100%;
+        max-height: none;
+        margin-top: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .tutorial-content {
+        padding: 20px;
+    }
+}

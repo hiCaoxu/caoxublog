@@ -1,0 +1,47 @@
+[
+    {
+        "id": "blog-1",
+        "title": "使用纯HTML/CSS/JS构建一个完整的静态博客",
+        "excerpt": "使用纯前端技术栈构建一个功能完整的静态博客系统，无需任何框架和构建工具。",
+        "file": "01-static-blog.md",
+        "createdAt": "2026-07-30 10:00",
+        "updatedAt": "2026-08-05 22:25",
+        "pinned": true
+    },
+    {
+        "id": "blog-2",
+        "title": "CSS Grid 布局完全指南",
+        "excerpt": "深入理解 CSS Grid 布局系统，从基本概念到实战应用，掌握现代 Web 布局的核心技术。",
+        "file": "02-css-grid.md",
+        "createdAt": "2026-08-01 09:00",
+        "updatedAt": "2026-08-05 21:55",
+        "pinned": true
+    },
+    {
+        "id": "blog-3",
+        "title": "JavaScript 异步编程演进：从回调到 async/await",
+        "excerpt": "回顾 JavaScript 异步编程的演进历程，深入理解 async/await 的使用场景和最佳实践。",
+        "file": "03-js-async.md",
+        "createdAt": "2026-08-03 11:00",
+        "updatedAt": "2026-08-05 21:56",
+        "pinned": false
+    },
+    {
+        "id": "blog-4",
+        "title": "前端性能优化实用技巧",
+        "excerpt": "分享前端性能优化的实用技巧，包括图片优化、代码分割、缓存策略等关键手段。",
+        "file": "04-performance.md",
+        "createdAt": "2026-08-04 08:30",
+        "updatedAt": "2026-08-05 21:56",
+        "pinned": false
+    },
+    {
+        "id": "blog-5",
+        "title": "Git 工作流最佳实践",
+        "excerpt": "介绍 Git 工作流的最佳实践，包括分支管理策略和提交信息规范。",
+        "file": "05-git-workflow.md",
+        "createdAt": "2026-08-04 22:00",
+        "updatedAt": "2026-08-05 21:56",
+        "pinned": true
+    }
+]
