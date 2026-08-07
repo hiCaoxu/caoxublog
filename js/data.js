@@ -155,6 +155,77 @@ function saveTutorialComments(comments) {
 }
 
 // ============================================
+// 点赞数据（访客本地存储）
+// key: 文章ID, value: { liked: boolean, count: number }
+// ============================================
+const LIKES_KEY = 'caoxublog_likes';
+
+// 各文章初始点赞数（仅首次展示用，访客操作后以此为基础增减）
+const INITIAL_LIKE_COUNTS = {
+    'blog-1': 12,
+    'blog-2': 25,
+    'blog-3': 18,
+    'blog-4': 9,
+    'blog-5': 7,
+    'tut-1-1': 15,
+    'tut-1-2': 21,
+    'tut-2-1-1': 11,
+    'tut-2-1-2': 8,
+    'tut-2-2': 13
+};
+
+function loadLikes() {
+    const data = safeStorageGet(LIKES_KEY);
+    return (data && typeof data === 'object' && !Array.isArray(data)) ? data : {};
+}
+
+function saveLikes(likes) {
+    safeStorageSet(LIKES_KEY, likes);
+}
+
+// 获取某篇文章的点赞状态和显示计数
+function getLikeState(articleId) {
+    const likes = loadLikes();
+    const record = likes[articleId];
+    const initial = INITIAL_LIKE_COUNTS[articleId] || 0;
+    if (record) {
+        return { liked: !!record.liked, count: record.count };
+    }
+    return { liked: false, count: initial };
+}
+
+// 切换点赞状态，返回新的状态和计数
+function toggleLike(articleId) {
+    const likes = loadLikes();
+    const initial = INITIAL_LIKE_COUNTS[articleId] || 0;
+    const record = likes[articleId] || { liked: false, count: initial };
+
+    record.liked = !record.liked;
+    record.count = Math.max(0, record.count + (record.liked ? 1 : -1));
+
+    likes[articleId] = record;
+    saveLikes(likes);
+    return { liked: record.liked, count: record.count };
+}
+
+// ============================================
+// 加载失败提示（file:// 协议下 fetch 会被浏览器拦截）
+// ============================================
+function showLoadError(containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const isFile = location.protocol === 'file:';
+    el.innerHTML = `
+        <div class="comment-empty" style="padding: 40px 20px;">
+            <p style="margin-bottom: 8px; font-weight: 600;">内容加载失败</p>
+            ${isFile
+                ? '<p>当前以 file:// 协议直接打开，浏览器会拦截数据请求。<br>请在项目目录运行 <code>python -m http.server 8080</code>，然后访问 <code>http://localhost:8080</code></p>'
+                : '<p>请检查网络后刷新重试</p>'}
+        </div>
+    `;
+}
+
+// ============================================
 // 博客筛选工具
 // ============================================
 

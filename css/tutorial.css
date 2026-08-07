@@ -150,6 +150,10 @@
     letter-spacing: -0.3px;
 }
 
+.tutorial-article .article-like-bar {
+    margin-bottom: 20px;
+}
+
 /* 响应式 */
 @media (max-width: 1024px) {
     .tutorial-page-container {

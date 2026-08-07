@@ -31,6 +31,7 @@
         }
     } catch (e) {
         console.error('博客加载失败:', e);
+        showLoadError('pinnedBlogs');
     }
 })();
 

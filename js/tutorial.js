@@ -19,6 +19,8 @@ let tutorials = [];
         }
     } catch (e) {
         console.error('教程加载失败:', e);
+        showLoadError('folderTree');
+        showLoadError('tutorialContent');
     }
 })();
 
@@ -185,9 +187,18 @@ async function openTutorialArticle(articleId) {
     try {
         await loadTutorialContent(article);
         const contentHtml = renderMarkdown(article.content);
+        const likeState = getLikeState(article.id);
         document.getElementById('tutorialContent').innerHTML = `
             <div class="tutorial-article">
                 <h1 class="article-title">${escapeHtml(article.name)}</h1>
+                <div class="article-like-bar">
+                    <button class="like-btn${likeState.liked ? ' liked' : ''}" id="tutorialLikeBtn" onclick="onTutorialLike('${article.id}')" aria-pressed="${likeState.liked}">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                        <span class="like-count">${likeState.count}</span>
+                    </button>
+                </div>
                 <div class="markdown-body">${contentHtml}</div>
             </div>
         `;
@@ -221,6 +232,17 @@ function renderTutorialComments(articleId) {
             <div class="comment-text">${escapeHtml(c.content)}</div>
         </div>
     `).join('');
+}
+
+// 点赞切换
+function onTutorialLike(articleId) {
+    const state = toggleLike(articleId);
+    const btn = document.getElementById('tutorialLikeBtn');
+    if (btn) {
+        btn.classList.toggle('liked', state.liked);
+        btn.setAttribute('aria-pressed', state.liked);
+        btn.querySelector('.like-count').textContent = state.count;
+    }
 }
 
 function submitTutorialComment() {
