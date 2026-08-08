@@ -155,24 +155,30 @@ function saveTutorialComments(comments) {
 }
 
 // ============================================
+// 配置项
+// ============================================
+
+// Waline 评论系统配置
+// 留空字符串 '' 表示不启用 Waline，使用本站内置的本地评论；
+// 填入你的 Waline 服务端地址即可切换到 Waline（评论与点赞统计由 Waline 接管）。
+// 例如：const WALINE_SERVER = 'https://waline.your-domain.com';
+const WALINE_SERVER = '';
+
+// 是否启用 Waline
+function isWalineEnabled() {
+    return typeof WALINE_SERVER === 'string' && WALINE_SERVER.trim() !== '';
+}
+
+// ============================================
 // 点赞数据（访客本地存储）
-// key: 文章ID, value: { liked: boolean, count: number }
+// 纯前端无真实 IP，此处用 localStorage 记录“本设备是否已点赞”，
+// 实现“每设备每篇仅可点赞 1 次且不可取消”的限制（等价于每访客 1 次）。
+// 如需基于真实 IP 限制，需配合后端，可使用上方 Waline / 自建接口。
 // ============================================
 const LIKES_KEY = 'caoxublog_likes';
 
-// 各文章初始点赞数（仅首次展示用，访客操作后以此为基础增减）
-const INITIAL_LIKE_COUNTS = {
-    'blog-1': 12,
-    'blog-2': 25,
-    'blog-3': 18,
-    'blog-4': 9,
-    'blog-5': 7,
-    'tut-1-1': 15,
-    'tut-1-2': 21,
-    'tut-2-1-1': 11,
-    'tut-2-1-2': 8,
-    'tut-2-2': 13
-};
+// 各文章初始点赞数（仅首次展示用）
+const INITIAL_LIKE_COUNTS = {};
 
 function loadLikes() {
     const data = safeStorageGet(LIKES_KEY);
@@ -194,18 +200,61 @@ function getLikeState(articleId) {
     return { liked: false, count: initial };
 }
 
-// 切换点赞状态，返回新的状态和计数
-function toggleLike(articleId) {
+// 点赞：每设备每篇仅可点赞 1 次，且不可取消
+// 返回新的状态和计数；若已点赞则返回原状态（不做任何修改）
+function likeArticle(articleId) {
     const likes = loadLikes();
     const initial = INITIAL_LIKE_COUNTS[articleId] || 0;
     const record = likes[articleId] || { liked: false, count: initial };
 
-    record.liked = !record.liked;
-    record.count = Math.max(0, record.count + (record.liked ? 1 : -1));
+    // 已经点过赞，直接返回，不允许重复/取消
+    if (record.liked) {
+        return { liked: true, count: record.count, changed: false };
+    }
+
+    record.liked = true;
+    record.count = record.count + 1;
 
     likes[articleId] = record;
     saveLikes(likes);
-    return { liked: record.liked, count: record.count };
+    return { liked: true, count: record.count, changed: true };
+}
+
+// 兼容旧调用名
+function toggleLike(articleId) {
+    return likeArticle(articleId);
+}
+
+// ============================================
+// 阅读量数据（访客本地存储）
+// 纯前端统计：记录本设备对每篇文章的访问次数（初始为 0）。
+// 注意：这是“本机累计访问”，并非全网真实阅读量；
+// 全网真实阅读量请启用 Waline（其自带 Pageview 统计）或接入后端统计。
+// key: 文章ID, value: number
+// ============================================
+const VIEWS_KEY = 'caoxublog_views';
+
+function loadViews() {
+    const data = safeStorageGet(VIEWS_KEY);
+    return (data && typeof data === 'object' && !Array.isArray(data)) ? data : {};
+}
+
+function saveViews(views) {
+    safeStorageSet(VIEWS_KEY, views);
+}
+
+// 获取某篇文章的阅读量（本机累计，初始 0）
+function getViewCount(articleId) {
+    const views = loadViews();
+    return views[articleId] || 0;
+}
+
+// 增加一次阅读量，返回最新计数
+function incrementViewCount(articleId) {
+    const views = loadViews();
+    views[articleId] = (views[articleId] || 0) + 1;
+    saveViews(views);
+    return views[articleId];
 }
 
 // ============================================

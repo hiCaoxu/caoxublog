@@ -625,6 +625,51 @@ body {
     text-align: center;
 }
 
+/* 已点赞后禁止再点（抖动提示） */
+.like-btn.shake {
+    animation: like-shake 0.4s ease;
+}
+
+@keyframes like-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+}
+
+.like-btn.liked {
+    cursor: default;
+}
+
+/* 阅读量展示 */
+.view-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.view-count .icon {
+    width: 15px;
+    height: 15px;
+}
+
+/* Waline 评论容器 */
+.waline-wrapper {
+    width: 100%;
+}
+
+#waline {
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+#waline .wl-editor {
+    background: var(--bg-secondary);
+}
+
 /* ============================================
    响应式
    ============================================ */

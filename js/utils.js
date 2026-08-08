@@ -278,3 +278,34 @@ function formatTime(timestamp) {
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
+
+/**
+ * 评论敏感词过滤
+ * 命中敏感词的字符将被替换为 '*'（按词长占位）。
+ * 可在下方 SENSITIVE_WORDS 中按需增删敏感词。
+ * @param {string} text
+ * @returns {{ text: string, hit: boolean, words: string[] }}
+ */
+const SENSITIVE_WORDS = [
+    // 示例敏感词，请按运营规范自行补充
+    '垃圾', '傻逼', '操你', 'fuck', 'shit', '广告', '代开发票', '色情', '赌博', '诈骗'
+];
+
+// 构建正则（长词优先，避免短词先匹配）
+const SENSITIVE_REGEX = (() => {
+    const sorted = [...SENSITIVE_WORDS].sort((a, b) => b.length - a.length);
+    const escaped = sorted.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    return new RegExp('(' + escaped.join('|') + ')', 'gi');
+})();
+
+function filterSensitiveWords(text) {
+    if (!text || typeof text !== 'string') {
+        return { text: '', hit: false, words: [] };
+    }
+    const found = new Set();
+    const filtered = text.replace(SENSITIVE_REGEX, (match) => {
+        found.add(match.toLowerCase());
+        return '*'.repeat(match.length);
+    });
+    return { text: filtered, hit: found.size > 0, words: [...found] };
+}

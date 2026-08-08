@@ -106,7 +106,14 @@ async function openBlogDetail(blogId) {
             '<p class="comment-empty">正文加载失败，请刷新重试</p>';
     }
 
-    renderComments(blogId);
+    // 评论区：启用 Waline 则挂载 Waline，否则使用本地评论
+    const sidebar = document.getElementById('commentSidebar');
+    if (isWalineEnabled()) {
+        sidebar.innerHTML = renderWalineComments(blogId);
+        initWaline(blogId);
+    } else {
+        renderComments(blogId);
+    }
 }
 
 function closeBlogDetail() {
@@ -122,6 +129,8 @@ function renderBlogDetail(blog, loading) {
         ? '<p class="comment-empty">加载中...</p>'
         : renderMarkdown(blog.content);
 
+    // 阅读量 +1（本机累计，初始 0）
+    const viewCount = loading ? 0 : incrementViewCount(blog.id);
     const likeState = getLikeState(blog.id);
 
     document.getElementById('blogArticleContent').innerHTML = `
@@ -141,6 +150,12 @@ function renderBlogDetail(blog, loading) {
                     </svg>
                     修改时间：${formatTime(blog.updatedAt)}
                 </span>
+                <span>
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    阅读 ${viewCount}
+                </span>
                 ${blog.pinned ? `
                 <span style="color: var(--pin-color);">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -149,7 +164,7 @@ function renderBlogDetail(blog, loading) {
                     已置顶
                 </span>
                 ` : ''}
-                <button class="like-btn${likeState.liked ? ' liked' : ''}" id="blogLikeBtn" onclick="onBlogLike('${blog.id}')" aria-pressed="${likeState.liked}">
+                <button class="like-btn${likeState.liked ? ' liked' : ''}" id="blogLikeBtn" onclick="onBlogLike('${blog.id}')" aria-pressed="${likeState.liked}" title="${likeState.liked ? '已点赞' : '点赞'}">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                     </svg>
@@ -161,15 +176,24 @@ function renderBlogDetail(blog, loading) {
     `;
 }
 
-// 点赞切换
+// 点赞：每设备每篇仅 1 次，不可取消
 function onBlogLike(blogId) {
-    const state = toggleLike(blogId);
+    const state = likeArticle(blogId);
     const btn = document.getElementById('blogLikeBtn');
-    if (btn) {
-        btn.classList.toggle('liked', state.liked);
-        btn.setAttribute('aria-pressed', state.liked);
-        btn.querySelector('.like-count').textContent = state.count;
+    if (!btn) return;
+
+    if (!state.changed) {
+        // 已点过赞，提示不可重复
+        btn.classList.add('shake');
+        setTimeout(() => btn.classList.remove('shake'), 400);
+        return;
     }
+
+    btn.classList.add('liked');
+    btn.setAttribute('aria-pressed', 'true');
+    btn.querySelector('.like-count').textContent = state.count;
+    btn.style.transform = 'scale(1.1)';
+    setTimeout(() => { btn.style.transform = ''; }, 150);
 }
 
 // ============================================
@@ -200,14 +224,25 @@ function renderComments(blogId) {
 
 function submitComment() {
     const nickname = document.getElementById('commentNickname').value.trim();
-    const content = document.getElementById('commentContent').value.trim();
+    const contentRaw = document.getElementById('commentContent').value.trim();
 
-    if (!content) {
+    if (!contentRaw) {
         alert('请输入评论内容');
         return;
     }
 
     if (!currentBlogId) return;
+
+    // 敏感词过滤
+    const filtered = filterSensitiveWords(contentRaw);
+    const content = filtered.text.trim();
+    if (!content) {
+        alert('评论内容不合法，请修改后重试');
+        return;
+    }
+    if (filtered.hit) {
+        alert('评论中包含敏感词，已自动过滤，过滤后内容将正常发布');
+    }
 
     const allComments = loadComments();
     if (!allComments[currentBlogId]) {
