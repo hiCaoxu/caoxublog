@@ -172,25 +172,6 @@ function renderBlogList() {
     }
 }
 
-// 构建文章目录 TOC（基于 Markdown 标题）
-function buildTOC(markdownText) {
-    const lines = (markdownText || '').replace(/\r\n?/g, '\n').split('\n');
-    const toc = [];
-    let inCode = false;
-    lines.forEach(line => {
-        if (/^```/.test(line.trim())) { inCode = !inCode; return; }
-        if (inCode) return;
-        const m = line.match(/^(#{2,4})\s+(.+?)\s*#*$/);
-        if (m) {
-            const level = m[1].length;
-            const text = m[2].trim();
-            const id = 'toc-' + toc.length;
-            toc.push({ level, text, id });
-        }
-    });
-    return toc;
-}
-
 async function openBlogDetail(blogId) {
     const blog = blogs.find(b => b.id === blogId);
     if (!blog) {
@@ -325,49 +306,7 @@ function renderBlogDetail(blog, loading) {
         // 代码高亮 + 复制按钮
         const root = document.getElementById('blogArticleContent');
         enhanceCodeBlocks(root);
-
-        // 生成 TOC 并给标题加 id
-        buildArticleTOC(root);
-
-        // 若 URL 带 #toc-xxx 则滚动
-        if (window.location.hash) {
-            const target = root.querySelector(window.location.hash);
-            if (target) target.scrollIntoView({ behavior: 'smooth' });
-        }
     }
-}
-
-// 根据正文标题生成目录，并给标题写入 id
-function buildArticleTOC(root) {
-    const tocNav = document.getElementById('tocNav');
-    const tocAside = document.getElementById('articleToc');
-    if (!tocNav || !root) return;
-
-    const headings = root.querySelectorAll('.markdown-body h2, .markdown-body h3, .markdown-body h4');
-    if (headings.length === 0) {
-        if (tocAside) tocAside.style.display = 'none';
-        tocNav.innerHTML = '';
-        return;
-    }
-
-    if (tocAside) tocAside.style.display = '';
-    let html = '';
-    headings.forEach((h, i) => {
-        const id = 'toc-' + i;
-        h.id = id;
-        const levelClass = 'toc-level-' + h.tagName.toLowerCase();
-        html += `<a class="toc-link ${levelClass}" href="#${id}" data-target="${id}">${escapeHtml(h.textContent)}</a>`;
-    });
-    tocNav.innerHTML = html;
-
-    // 点击平滑滚动
-    tocNav.querySelectorAll('.toc-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = document.getElementById(link.dataset.target);
-            if (target) target.scrollIntoView({ behavior: 'smooth' });
-        });
-    });
 }
 
 // 点赞：每设备每篇仅 1 次，不可取消

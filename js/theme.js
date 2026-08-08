@@ -30,6 +30,10 @@ function initThemeToggle() {
 
     document.querySelectorAll('.theme-toggle').forEach(btn => {
         btn.setAttribute('aria-label', theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式');
+        const sun = btn.querySelector('.icon-sun');
+        const moon = btn.querySelector('.icon-moon');
+        if (sun) sun.style.display = theme === 'dark' ? 'none' : '';
+        if (moon) moon.style.display = theme === 'dark' ? '' : 'none';
         btn.addEventListener('click', () => {
             const current = document.documentElement.getAttribute('data-theme');
             const next = current === 'dark' ? 'light' : 'dark';
@@ -38,6 +42,10 @@ function initThemeToggle() {
             safeStorageSet(THEME_KEY, next);
             document.querySelectorAll('.theme-toggle').forEach(b => {
                 b.setAttribute('aria-label', next === 'dark' ? '切换到亮色模式' : '切换到亮色模式');
+                const s = b.querySelector('.icon-sun');
+                const m = b.querySelector('.icon-moon');
+                if (s) s.style.display = next === 'dark' ? 'none' : '';
+                if (m) m.style.display = next === 'dark' ? '' : 'none';
             });
         });
     });
@@ -79,3 +87,13 @@ function swapHighlightTheme(theme) {
     applyTheme(theme);
     swapHighlightTheme(theme);
 })();
+
+// DOM 就绪后绑定所有主题切换按钮
+function bindThemeToggleOnReady() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initThemeToggle);
+    } else {
+        initThemeToggle();
+    }
+}
+bindThemeToggleOnReady();
