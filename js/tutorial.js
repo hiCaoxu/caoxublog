@@ -162,6 +162,19 @@ function findArticleById(items, id) {
     return null;
 }
 
+// 扁平化所有文章（按目录树展示顺序），用于上一篇/下一篇
+function flattenArticles(items) {
+    const result = [];
+    items.forEach(item => {
+        if (item.type === 'article') {
+            result.push(item);
+        } else if (item.type === 'folder' && item.children) {
+            result.push(...flattenArticles(item.children));
+        }
+    });
+    return result;
+}
+
 async function openTutorialArticle(articleId) {
     const article = findArticleById(tutorials, articleId);
     if (!article) {
@@ -195,6 +208,27 @@ async function openTutorialArticle(articleId) {
         const contentHtml = renderMarkdown(article.content);
         const likeState = getLikeState(article.id);
         const viewCount = incrementViewCount(article.id);
+
+        // 上一篇 / 下一篇（基于扁平化顺序）
+        const flat = flattenArticles(tutorials);
+        const idx = flat.findIndex(a => a.id === article.id);
+        let prevHtml = '<span class="nav-placeholder"></span>';
+        let nextHtml = '<span class="nav-placeholder"></span>';
+        if (idx > 0) {
+            const prev = flat[idx - 1];
+            prevHtml = `<a class="post-nav-link prev" href="tutorial.html" onclick="event.preventDefault(); openTutorialArticle('${prev.id}'); highlightTreeArticle('${prev.id}')">
+                <span class="nav-dir">上一篇</span>
+                <span class="nav-title">${escapeHtml(prev.name)}</span>
+            </a>`;
+        }
+        if (idx >= 0 && idx < flat.length - 1) {
+            const next = flat[idx + 1];
+            nextHtml = `<a class="post-nav-link next" href="tutorial.html" onclick="event.preventDefault(); openTutorialArticle('${next.id}'); highlightTreeArticle('${next.id}')">
+                <span class="nav-dir">下一篇</span>
+                <span class="nav-title">${escapeHtml(next.name)}</span>
+            </a>`;
+        }
+
         document.getElementById('tutorialContent').innerHTML = `
             <div class="tutorial-article">
                 <h1 class="article-title">${escapeHtml(article.name)}</h1>
@@ -213,8 +247,12 @@ async function openTutorialArticle(articleId) {
                     </span>
                 </div>
                 <div class="markdown-body">${contentHtml}</div>
+                <div class="post-nav tutorial-post-nav">${prevHtml}${nextHtml}</div>
             </div>
         `;
+
+        // 代码高亮 + 复制按钮
+        enhanceCodeBlocks(document.getElementById('tutorialContent'));
     } catch (e) {
         console.error('正文加载失败:', e);
         document.getElementById('tutorialContent').innerHTML = `

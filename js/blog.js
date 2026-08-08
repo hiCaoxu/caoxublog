@@ -4,6 +4,11 @@
 
 let currentBlogId = null;
 let blogs = [];
+let filteredBlogs = [];          // 经过搜索/标签筛选后的列表
+let activeTag = '';              // 当前选中的标签（'' 表示全部）
+let searchKeyword = '';          // 当前搜索关键词
+let currentPage = 1;             // 当前分页
+const PAGE_SIZE = 10;            // 每页显示数量
 
 (async function () {
     try {
@@ -12,7 +17,10 @@ let blogs = [];
         // 按创建时间倒序排列
         blogs.sort((a, b) => b.createdAt - a.createdAt);
 
-        renderBlogList();
+        filteredBlogs = blogs.slice();
+
+        renderTagFilter();
+        renderSearchAndList();
 
         // 检查 URL 参数，如果有 id 则打开对应博客
         const params = new URLSearchParams(window.location.search);
@@ -26,18 +34,87 @@ let blogs = [];
     }
 })();
 
+// 收集所有标签
+function collectTags() {
+    const tagSet = new Set();
+    blogs.forEach(b => {
+        (b.tags || []).forEach(t => tagSet.add(t));
+    });
+    return [...tagSet].sort((a, b) => a.localeCompare(b, 'zh-CN'));
+}
+
+// 渲染标签筛选栏
+function renderTagFilter() {
+    const container = document.getElementById('tagFilter');
+    if (!container) return;
+    const tags = collectTags();
+
+    const tagHtml = [`<button class="tag-chip${activeTag === '' ? ' active' : ''}" data-tag="">全部</button>`]
+        .concat(tags.map(t => `
+            <button class="tag-chip${activeTag === t ? ' active' : ''}" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</button>
+        `)).join('');
+
+    container.innerHTML = tagHtml;
+    container.querySelectorAll('.tag-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            activeTag = chip.dataset.tag;
+            currentPage = 1;
+            renderTagFilter();
+            applyFilterAndRender();
+        });
+    });
+}
+
+// 应用搜索 + 标签筛选，并更新列表 + 分页
+function applyFilterAndRender() {
+    const kw = searchKeyword.trim().toLowerCase();
+    filteredBlogs = blogs.filter(b => {
+        const matchTag = activeTag === '' || (b.tags || []).includes(activeTag);
+        const matchKw = kw === '' ||
+            b.title.toLowerCase().includes(kw) ||
+            (b.excerpt || '').toLowerCase().includes(kw) ||
+            (b.tags || []).some(t => t.toLowerCase().includes(kw));
+        return matchTag && matchKw;
+    });
+    renderBlogList();
+}
+
+// 渲染搜索框 + 列表 + 分页
+function renderSearchAndList() {
+    const searchInput = document.getElementById('blogSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            searchKeyword = e.target.value;
+            currentPage = 1;
+            applyFilterAndRender();
+        });
+    }
+    renderBlogList();
+}
+
+// 渲染博客列表（含分页）
 function renderBlogList() {
     const listContainer = document.getElementById('blogList');
     const emptyHint = document.getElementById('blogEmpty');
+    const pagination = document.getElementById('blogPagination');
 
-    if (blogs.length === 0) {
+    if (!listContainer) return;
+
+    if (filteredBlogs.length === 0) {
         listContainer.innerHTML = '';
-        emptyHint.style.display = 'block';
+        if (emptyHint) emptyHint.style.display = 'block';
+        if (pagination) pagination.innerHTML = '';
         return;
     }
 
-    emptyHint.style.display = 'none';
-    listContainer.innerHTML = blogs.map(blog => {
+    if (emptyHint) emptyHint.style.display = 'none';
+
+    const totalPages = Math.max(1, Math.ceil(filteredBlogs.length / PAGE_SIZE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const pageItems = filteredBlogs.slice(start, start + PAGE_SIZE);
+
+    listContainer.innerHTML = pageItems.map(blog => {
         const excerpt = blog.excerpt || '';
         return `
             <div class="blog-card${blog.pinned ? ' pinned' : ''}">
@@ -71,6 +148,47 @@ function renderBlogList() {
             </div>
         `;
     }).join('');
+
+    // 分页
+    if (pagination) {
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+        } else {
+            let pages = '';
+            for (let p = 1; p <= totalPages; p++) {
+                pages += `<button class="page-btn${p === currentPage ? ' active' : ''}" data-page="${p}">${p}</button>`;
+            }
+            pagination.innerHTML = pages;
+            pagination.querySelectorAll('.page-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentPage = parseInt(btn.dataset.page);
+                    renderBlogList();
+                    if (window.innerWidth <= 1024) {
+                        document.getElementById('blogListSection').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        }
+    }
+}
+
+// 构建文章目录 TOC（基于 Markdown 标题）
+function buildTOC(markdownText) {
+    const lines = (markdownText || '').replace(/\r\n?/g, '\n').split('\n');
+    const toc = [];
+    let inCode = false;
+    lines.forEach(line => {
+        if (/^```/.test(line.trim())) { inCode = !inCode; return; }
+        if (inCode) return;
+        const m = line.match(/^(#{2,4})\s+(.+?)\s*#*$/);
+        if (m) {
+            const level = m[1].length;
+            const text = m[2].trim();
+            const id = 'toc-' + toc.length;
+            toc.push({ level, text, id });
+        }
+    });
+    return toc;
 }
 
 async function openBlogDetail(blogId) {
@@ -133,8 +251,35 @@ function renderBlogDetail(blog, loading) {
     const viewCount = loading ? 0 : incrementViewCount(blog.id);
     const likeState = getLikeState(blog.id);
 
+    // 上一篇 / 下一篇（基于倒序列表）
+    let prevHtml = '<span class="nav-placeholder"></span>';
+    let nextHtml = '<span class="nav-placeholder"></span>';
+    if (!loading) {
+        const idx = blogs.findIndex(b => b.id === blog.id);
+        if (idx > 0) {
+            const prev = blogs[idx - 1];
+            prevHtml = `<a class="post-nav-link prev" href="blog.html?id=${encodeURIComponent(prev.id)}" onclick="event.preventDefault(); openBlogDetail('${prev.id}')">
+                <span class="nav-dir">上一篇</span>
+                <span class="nav-title">${escapeHtml(prev.title)}</span>
+            </a>`;
+        }
+        if (idx >= 0 && idx < blogs.length - 1) {
+            const next = blogs[idx + 1];
+            nextHtml = `<a class="post-nav-link next" href="blog.html?id=${encodeURIComponent(next.id)}" onclick="event.preventDefault(); openBlogDetail('${next.id}')">
+                <span class="nav-dir">下一篇</span>
+                <span class="nav-title">${escapeHtml(next.title)}</span>
+            </a>`;
+        }
+    }
+
     document.getElementById('blogArticleContent').innerHTML = `
         <div class="article-header">
+            <button class="back-btn" onclick="closeBlogDetail()">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                返回列表
+            </button>
             <h1 class="article-title">${escapeHtml(blog.title)}</h1>
             <div class="article-meta">
                 <span>
@@ -173,7 +318,56 @@ function renderBlogDetail(blog, loading) {
             </div>
         </div>
         <div class="markdown-body">${contentHtml}</div>
+        <div class="post-nav">${prevHtml}${nextHtml}</div>
     `;
+
+    if (!loading) {
+        // 代码高亮 + 复制按钮
+        const root = document.getElementById('blogArticleContent');
+        enhanceCodeBlocks(root);
+
+        // 生成 TOC 并给标题加 id
+        buildArticleTOC(root);
+
+        // 若 URL 带 #toc-xxx 则滚动
+        if (window.location.hash) {
+            const target = root.querySelector(window.location.hash);
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+}
+
+// 根据正文标题生成目录，并给标题写入 id
+function buildArticleTOC(root) {
+    const tocNav = document.getElementById('tocNav');
+    const tocAside = document.getElementById('articleToc');
+    if (!tocNav || !root) return;
+
+    const headings = root.querySelectorAll('.markdown-body h2, .markdown-body h3, .markdown-body h4');
+    if (headings.length === 0) {
+        if (tocAside) tocAside.style.display = 'none';
+        tocNav.innerHTML = '';
+        return;
+    }
+
+    if (tocAside) tocAside.style.display = '';
+    let html = '';
+    headings.forEach((h, i) => {
+        const id = 'toc-' + i;
+        h.id = id;
+        const levelClass = 'toc-level-' + h.tagName.toLowerCase();
+        html += `<a class="toc-link ${levelClass}" href="#${id}" data-target="${id}">${escapeHtml(h.textContent)}</a>`;
+    });
+    tocNav.innerHTML = html;
+
+    // 点击平滑滚动
+    tocNav.querySelectorAll('.toc-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = document.getElementById(link.dataset.target);
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
 }
 
 // 点赞：每设备每篇仅 1 次，不可取消

@@ -200,11 +200,26 @@ function renderMarkdown(text) {
 
     let html = output.join('\n');
 
-    // 5. 恢复代码块
+    // 5. 恢复代码块（带语言标签、行号、复制按钮）
     html = html.replace(/%%CODEBLOCK_(\d+)%%/g, (_, i) => {
         const block = codeBlocks[parseInt(i)];
-        const langAttr = block.lang ? ` class="language-${block.lang}"` : '';
-        return `<pre><code${langAttr}>${escapeHtml(block.code)}</code></pre>`;
+        const lang = block.lang || 'text';
+        const langAttr = ` class="language-${lang}"`;
+        const codeLines = block.code.split('\n');
+        const lineNums = codeLines.map((_, idx) => idx + 1).join('\n');
+        const safeCode = escapeHtml(block.code);
+        return (
+            `<div class="code-block">` +
+                `<div class="code-header">` +
+                    `<span class="code-lang">${escapeHtml(lang)}</span>` +
+                    `<button class="code-copy-btn" type="button">复制</button>` +
+                `</div>` +
+                `<div class="code-body">` +
+                    `<div class="code-lines">${lineNums}</div>` +
+                    `<pre><code${langAttr}>${safeCode}</code></pre>` +
+                `</div>` +
+            `</div>`
+        );
     });
 
     // 6. 恢复行内代码
@@ -308,4 +323,59 @@ function filterSensitiveWords(text) {
         return '*'.repeat(match.length);
     });
     return { text: filtered, hit: found.size > 0, words: [...found] };
+}
+
+/**
+ * 代码块增强：语法高亮 + 复制按钮
+ * 在 Markdown 渲染注入 DOM 后调用，传入容器元素。
+ * 依赖 highlight.js（全局 window.hljs），若未加载则跳过高亮只绑定复制。
+ * @param {HTMLElement} root
+ */
+function enhanceCodeBlocks(root) {
+    if (!root) return;
+
+    // 语法高亮
+    if (window.hljs) {
+        root.querySelectorAll('.code-block pre code').forEach(block => {
+            try {
+                window.hljs.highlightElement(block);
+            } catch (e) { /* 忽略单块高亮失败 */ }
+        });
+    }
+
+    // 复制按钮
+    root.querySelectorAll('.code-copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const codeBlock = btn.closest('.code-block');
+            const codeEl = codeBlock ? codeBlock.querySelector('pre code') : null;
+            if (!codeEl) return;
+            const text = codeEl.textContent;
+            const done = () => {
+                const original = '复制';
+                btn.textContent = '已复制';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = original;
+                    btn.classList.remove('copied');
+                }, 1500);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+            } else {
+                fallbackCopy(text, done);
+            }
+        });
+    });
+}
+
+// 兼容不支持 Clipboard API 的环境
+function fallbackCopy(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { /* ignore */ }
+    document.body.removeChild(ta);
 }

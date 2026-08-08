@@ -27,6 +27,19 @@
                 <li><a href="blog.html" class="active">博客</a></li>
                 <li><a href="tutorial.html">教程</a></li>
                 <li><a href="about.html">关于我</a></li>
+                <li>
+                    <button class="theme-toggle" type="button" aria-label="切换主题">
+                        <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                        <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    </button>
+                </li>
             </ul>
         </div>
     </nav>
@@ -44,20 +57,33 @@
                 </svg>
                 全部博客
             </h2>
+
+            <!-- 搜索 + 标签筛选 -->
+            <div class="blog-toolbar">
+                <div class="search-box">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="blogSearch" placeholder="搜索标题、摘要或标签..." aria-label="搜索博客">
+                </div>
+                <div class="tag-filter" id="tagFilter"></div>
+            </div>
+
             <div class="blog-list" id="blogList"></div>
             <p class="empty-hint" id="blogEmpty">暂无博客</p>
+            <div class="pagination" id="blogPagination"></div>
         </section>
 
         <!-- 博客详情区域 -->
         <section class="blog-detail-section" id="blogDetail" style="display:none;">
             <div class="blog-detail-inner">
-                <button class="back-btn" onclick="closeBlogDetail()">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-                    </svg>
-                    返回列表
-                </button>
                 <article class="blog-article" id="blogArticleContent"></article>
+                <aside class="article-toc" id="articleToc">
+                    <div class="toc-inner">
+                        <div class="toc-title">目录</div>
+                        <nav class="toc-nav" id="tocNav"></nav>
+                    </div>
+                </aside>
             </div>
         </section>
 
@@ -81,8 +107,14 @@
     <!-- 鼠标移动特效 -->
     <div class="mouse-trail-container" id="mouseTrail"></div>
 
+    <!-- 语法高亮 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css" id="hljs-light">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-dark" disabled>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+
     <script src="js/data.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/theme.js"></script>
     <script src="js/mouse-trail.js"></script>
     <script src="js/waline.js"></script>
     <script src="js/blog.js"></script>

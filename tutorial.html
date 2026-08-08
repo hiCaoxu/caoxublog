@@ -27,6 +27,19 @@
                 <li><a href="blog.html">博客</a></li>
                 <li><a href="tutorial.html" class="active">教程</a></li>
                 <li><a href="about.html">关于我</a></li>
+                <li>
+                    <button class="theme-toggle" type="button" aria-label="切换主题">
+                        <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                        <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    </button>
+                </li>
             </ul>
         </div>
     </nav>
@@ -74,8 +87,14 @@
     <!-- 鼠标移动特效 -->
     <div class="mouse-trail-container" id="mouseTrail"></div>
 
+    <!-- 语法高亮 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css" id="hljs-light">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-dark" disabled>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+
     <script src="js/data.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/theme.js"></script>
     <script src="js/mouse-trail.js"></script>
     <script src="js/waline.js"></script>
     <script src="js/tutorial.js"></script>
