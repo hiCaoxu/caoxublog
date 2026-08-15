@@ -168,6 +168,8 @@ npm test          # 等价于 node --test
 
 本项目由 **WorkBuddy** 和 **DeepSeek-V4-Pro** 编写完成，并通过 **Kimi-K3** 做了较大的优化，包括：Markdown 渲染器重写与 CRLF 兼容修复、布局重构（评论区嵌入 flex 布局、正文宽度统一）、数据层从 localStorage 缓存重构为 md 文件实时加载、可访问性增强，以及 `build-index.js` 内容索引自动化脚本。
 
+项目上线后的持续迭代由 **DeepSeek Harness**（基于 DeepSeek-V4 的智能体框架）协助完成，包括：导航标语与鼠标光点特效的视觉微调、README 文档的全面优化，以及 Markdown 渲染器 XSS 协议白名单安全加固与其单元测试（`node --test`，零依赖）。
+
 ## License
 
 MIT
