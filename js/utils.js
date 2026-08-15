@@ -29,9 +29,21 @@ function renderMarkdown(text) {
     });
 
     // 3. 行内格式（在文本级别做，不碰行结构）
-    //    图片必须在链接之前处理
-    text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
-    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    //    图片必须在链接之前处理；URL 均经过安全白名单校验，标签文本做 HTML 转义
+    text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
+        const safe = sanitizeUrl(url);
+        const altHtml = escapeHtml(alt);
+        return safe
+            ? `<img src="${escapeHtml(safe)}" alt="${altHtml}">`
+            : `<span class="blocked-image">[不安全的图片地址，已拦截]</span>`;
+    });
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
+        const safe = sanitizeUrl(url);
+        const labelHtml = escapeHtml(label);
+        return safe
+            ? `<a href="${escapeHtml(safe)}" target="_blank" rel="noopener">${labelHtml}</a>`
+            : `<a rel="noopener">${labelHtml}</a>`;
+    });
 
     // 粗体和斜体
     text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
@@ -230,6 +242,75 @@ function renderMarkdown(text) {
     return html;
 }
 
+// ============================================
+// URL 安全白名单（防 XSS）
+// ============================================
+
+// 允许的显式协议（其余如 javascript: / data: / vbscript: / file: 一律拦截）
+const SAFE_URL_PROTOCOLS = ['http:', 'https:', 'mailto:', 'tel:'];
+
+/**
+ * 解码 HTML 实体（数字 + 常见命名实体），最多 3 轮防止双重编码绕过
+ * 覆盖 URL 走私常用实体：空白（Tab/NewLine/nbsp）与 URL 语法字符（: / ( ) ? = 等）
+ */
+function decodeHtmlEntities(str) {
+    const named = {
+        amp: '&', lt: '<', gt: '>', quot: '"', apos: "'",
+        nbsp: ' ', Tab: '\t', NewLine: '\n',
+        colon: ':', semi: ';', sol: '/', lpar: '(', rpar: ')',
+        comma: ',', period: '.', quest: '?', equals: '=',
+        num: '#', dollar: '$', percent: '%', excl: '!',
+        ast: '*', plus: '+', lowbar: '_', hyphen: '-', dash: '-'
+    };
+    let out = String(str);
+    for (let round = 0; round < 3; round++) {
+        const next = out.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/g, (match, body) => {
+            if (body[0] === '#') {
+                const isHex = body[1] === 'x' || body[1] === 'X';
+                const code = parseInt(body.slice(isHex ? 2 : 1), isHex ? 16 : 10);
+                if (Number.isFinite(code) && code > 0 && code <= 0x10FFFF) {
+                    try { return String.fromCodePoint(code); } catch (e) { return match; }
+                }
+                return match;
+            }
+            return Object.prototype.hasOwnProperty.call(named, body) ? named[body] : match;
+        });
+        if (next === out) break;
+        out = next;
+    }
+    return out;
+}
+
+/**
+ * URL 安全校验：仅允许白名单协议或站内相对路径。
+ * 不安全的 URL 返回 ''，调用方据此跳过 href/src 属性。
+ * @param {string} url
+ * @returns {string}
+ */
+function sanitizeUrl(url) {
+    if (!url) return '';
+    // 去首尾空白与控制字符（防止换行/制表符拆断属性）
+    let u = String(url).trim().replace(/[\u0000-\u001f\u007f]/g, '');
+
+    // 先解码 HTML 实体（含双重编码），再校验，防止实体混淆绕过
+    u = decodeHtmlEntities(u);
+    // 解码可能还原出制表符/换行等控制字符（如 &Tab;），需二次清理
+    u = u.trim().replace(/[\u0000-\u001f\u007f]/g, '');
+
+    // 拒绝可能破坏双引号属性的字符
+    if (/["'<>]/.test(u)) return '';
+
+    // 显式协议：仅白名单放行（大小写不敏感）
+    const schemeMatch = u.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+    if (schemeMatch) {
+        const scheme = schemeMatch[1].toLowerCase() + ':';
+        return SAFE_URL_PROTOCOLS.includes(scheme) ? u : '';
+    }
+
+    // 无协议：相对路径 / 锚点 / 协议相对地址（//cdn...）均视为站内安全链接
+    return u;
+}
+
 function escapeHtml(text) {
     const map = {
         '&': '&amp;',
@@ -378,4 +459,19 @@ function fallbackCopy(text, done) {
     ta.select();
     try { document.execCommand('copy'); done(); } catch (e) { /* ignore */ }
     document.body.removeChild(ta);
+}
+
+// 兼容 Node.js 测试环境（浏览器中 module 未定义，不影响原有行为）
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        renderMarkdown,
+        sanitizeUrl,
+        decodeHtmlEntities,
+        escapeHtml,
+        getExcerpt,
+        formatTime,
+        generateId,
+        filterSensitiveWords,
+        SENSITIVE_WORDS
+    };
 }

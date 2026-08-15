@@ -1,0 +1,10 @@
+{
+    "name": "caoxublog",
+    "version": "1.0.0",
+    "private": true,
+    "description": "CaoxuBlog - 纯静态个人博客系统（零运行时依赖）",
+    "scripts": {
+        "test": "node --test tests/",
+        "build-index": "node build-index.js"
+    }
+}

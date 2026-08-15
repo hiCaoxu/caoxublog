@@ -28,6 +28,7 @@
 | 数据持久化 | 评论、点赞、阅读量、主题均存于访客浏览器 localStorage（`safeStorage*` 容错封装） |
 | 评论（可选） | Waline v3（unpkg CDN 按需加载），需自建服务端 |
 | 内容索引生成 | Node.js 脚本 `build-index.js`（零依赖，仅用 `fs` / `path`） |
+| 单元测试 | Node 内置 test runner（`node:test`，零第三方依赖） |
 | 部署 | 任意静态服务器（Nginx / COS / EdgeOne Pages / GitHub Pages 等） |
 
 ## 项目结构
@@ -104,6 +105,16 @@ npx serve .
 - 博客按文件名匹配：`id`、`title`、`excerpt`、`createdAt`、`pinned` 全部保留，仅 `updatedAt` 跟随文件修改时间
 - 教程按文件路径匹配：文件夹中文名、文章名保留
 - 注意：git clone、解压 zip 等操作会刷新文件 mtime，导致所有 `updatedAt` 变为同一时间，此时需手动修正清单
+
+## 测试
+
+Markdown 渲染器（含 XSS 协议白名单）使用 Node 内置 test runner 做单元测试，零第三方依赖：
+
+```bash
+npm test          # 等价于 node --test
+```
+
+覆盖：协议白名单（http/https/mailto/tel + 站内相对路径）、危险协议拦截（javascript/data/vbscript/file）、HTML 实体与双重编码混淆绕过、属性引号逃逸、标签/alt 文本转义，以及标题、列表、引用、表格、代码块（CRLF 兼容）等基础语法回归。
 
 ## 评论与统计
 
