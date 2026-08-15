@@ -10,7 +10,7 @@
     let lastTime = 0;
     const throttleMs = 30;
     const dotSize = 18;
-    const maxDots = 20;
+    const maxDots = 100;
 
     document.addEventListener('mousemove', (e) => {
         const now = Date.now();
