@@ -1,4 +1,4 @@
-# 点工Caoxu - Nginx 部署配置（腾讯云轻量应用服务器 / CVM 参考）
+# CaoxuBlog - Nginx 部署配置（腾讯云轻量应用服务器 / CVM 参考）
 # 用法：
 #   1. 将整个项目目录上传到服务器，例如 /var/www/caoxublog
 #   2. 申请证书：腾讯云控制台免费 DV 证书，或 Let's Encrypt（certbot）

@@ -1,5 +1,5 @@
 /* ============================================
-   点工Caoxu - 教程页面逻辑
+   CaoxuBlog - 教程页面逻辑
    ============================================ */
 
 let currentTutorialId = null;
@@ -286,7 +286,7 @@ async function openTutorialArticle(articleId) {
     currentTutorialId = articleId;
 
     // 动态更新页面标题与描述（SEO / 分享预览）
-    document.title = article.name + ' - 点工Caoxu';
+    document.title = article.name + ' - CaoxuBlog';
     setMetaDescription('教程：' + article.name);
 
     // 先显示标题和加载提示

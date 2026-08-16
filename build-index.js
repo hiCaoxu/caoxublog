@@ -1,5 +1,5 @@
 /* ============================================
-   点工Caoxu - 内容索引与静态页生成脚本
+   CaoxuBlog - 内容索引与静态页生成脚本
    用法：node build-index.js
    作用：
    1. 扫描 blogs/*.md 和 tutorials/ 目录树
@@ -298,7 +298,7 @@ function renderArticlePage(article) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="${utils.escapeHtml(desc)}">
-    <title>${utils.escapeHtml(title)} - 点工Caoxu</title>
+    <title>${utils.escapeHtml(title)} - CaoxuBlog</title>
     <link rel="canonical" href="${canonical}">
     <meta property="og:type" content="article">
     <meta property="og:title" content="${utils.escapeHtml(title)}">
@@ -317,7 +317,7 @@ function renderArticlePage(article) {
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
                 <span class="logo-text">
-                    <span class="logo-name">点工Caoxu</span>
+                    <span class="logo-name">CaoxuBlog</span>
                     <span class="logo-tagline">代码永远在等待一个它从未通过的测试</span>
                 </span>
             </a>
@@ -455,7 +455,7 @@ function buildArticlePages() {
         const pubDate = new Date(b.createdAt.replace(' ', 'T') + ':00').toUTCString();
         return '    <item>\n      <title>' + escapeXml(b.title) + '</title>\n      <link>' + SITE_URL + '/post/' + b.id + '.html</link>\n      <description>' + escapeXml(b.excerpt || '') + '</description>\n      <pubDate>' + pubDate + '</pubDate>\n      <guid>' + SITE_URL + '/post/' + b.id + '.html</guid>\n    </item>';
     }).join('\n');
-    const feedXml = '<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0">\n  <channel>\n    <title>点工Caoxu</title>\n    <link>' + SITE_URL + '/</link>\n    <description>点工Caoxu - 测试技术与前端开发经验分享</description>\n' + rssItems + '\n  </channel>\n</rss>\n';
+    const feedXml = '<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0">\n  <channel>\n    <title>CaoxuBlog</title>\n    <link>' + SITE_URL + '/</link>\n    <description>CaoxuBlog - 测试技术与前端开发经验分享</description>\n' + rssItems + '\n  </channel>\n</rss>\n';
     fs.writeFileSync(path.join(ROOT, 'feed.xml'), feedXml, 'utf8');
 
     console.log(`静态页已生成：博客 ${blogs.length} 篇，教程 ${tutorialArticles.length} 篇；sitemap.xml / robots.txt / feed.xml 已更新`);

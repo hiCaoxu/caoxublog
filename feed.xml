@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>点工Caoxu</title>
+    <title>CaoxuBlog</title>
     <link>https://hiCaoxu.github.io/caoxublog/</link>
-    <description>点工Caoxu - 测试技术与前端开发经验分享</description>
+    <description>CaoxuBlog - 测试技术与前端开发经验分享</description>
     <item>
       <title>Git 工作流最佳实践</title>
       <link>https://hiCaoxu.github.io/caoxublog/post/blog-5.html</link>

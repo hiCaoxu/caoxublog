@@ -1,5 +1,5 @@
 /* ============================================
-   点工Caoxu - 归档页逻辑
+   CaoxuBlog - 归档页逻辑
    展示已归档的博客与教程（archive.html?type=blog|tutorial）
    ============================================ */
 
@@ -31,7 +31,7 @@
         tabTutorial.setAttribute('aria-selected', String(!isBlog));
         panelBlog.hidden = !isBlog;
         panelTutorial.hidden = isBlog;
-        document.title = '点工Caoxu - ' + (isBlog ? '博客归档' : '教程归档');
+        document.title = 'CaoxuBlog - ' + (isBlog ? '博客归档' : '教程归档');
         // 更新 URL（replaceState 保持返回行为）
         try {
             history.replaceState({}, '', 'archive.html?type=' + type);
