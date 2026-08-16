@@ -69,7 +69,8 @@ function buildBlogsIndex() {
             createdAt: old ? old.createdAt : formatDateTime(stat.birthtimeMs ? stat.birthtime : stat.mtime),
             // 修改时间始终跟随文件修改时间
             updatedAt: formatDateTime(stat.mtime),
-            pinned: old ? !!old.pinned : false
+            pinned: old ? !!old.pinned : false,
+            archived: old ? !!old.archived : false
         };
     });
 
@@ -89,7 +90,7 @@ function buildBlogsIndex() {
 function collectExistingMeta(items, folderMap, articleMap, parentPath) {
     for (const item of items) {
         if (item.type === 'article') {
-            articleMap.set(item.file, { id: item.id, name: item.name });
+            articleMap.set(item.file, { id: item.id, name: item.name, archived: item.archived });
         } else if (item.type === 'folder') {
             // 先递归收集后代文章路径
             const files = [];
@@ -153,7 +154,8 @@ function scanTutorialDir(dirAbs, dirRel, folderMap, articleMap, depth, logs) {
             id: old ? old.id : 'tut-' + rel.replace(/\.md$/, '').replace(/\//g, '-'),
             name: old ? old.name : stripPrefix(file.name.replace(/\.md$/, '')),
             type: 'article',
-            file: rel
+            file: rel,
+            archived: old ? !!old.archived : false
         });
     }
 

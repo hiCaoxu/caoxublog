@@ -6,7 +6,8 @@
         "file": "01-static-blog.md",
         "createdAt": "2026-07-30 10:00",
         "updatedAt": "2026-08-05 22:25",
-        "pinned": true
+        "pinned": true,
+        "archived": false
     },
     {
         "id": "blog-2",
@@ -15,7 +16,8 @@
         "file": "02-css-grid.md",
         "createdAt": "2026-08-01 09:00",
         "updatedAt": "2026-08-05 21:55",
-        "pinned": true
+        "pinned": true,
+        "archived": false
     },
     {
         "id": "blog-3",
@@ -24,7 +26,8 @@
         "file": "03-js-async.md",
         "createdAt": "2026-08-03 11:00",
         "updatedAt": "2026-08-05 21:56",
-        "pinned": false
+        "pinned": false,
+        "archived": false
     },
     {
         "id": "blog-4",
@@ -33,7 +36,8 @@
         "file": "04-performance.md",
         "createdAt": "2026-08-04 08:30",
         "updatedAt": "2026-08-05 21:56",
-        "pinned": false
+        "pinned": false,
+        "archived": false
     },
     {
         "id": "blog-5",
@@ -42,6 +46,7 @@
         "file": "05-git-workflow.md",
         "createdAt": "2026-08-04 22:00",
         "updatedAt": "2026-08-05 21:56",
-        "pinned": true
+        "pinned": true,
+        "archived": false
     }
 ]

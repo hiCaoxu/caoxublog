@@ -41,6 +41,14 @@
     color: var(--accent);
 }
 
+/* 侧栏归档按钮（靠右对齐） */
+.sidebar-title .sidebar-archive {
+    margin-left: auto;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    border-radius: var(--radius-sm);
+}
+
 /* 文件夹树 */
 .folder-tree {
     font-size: 0.875rem;

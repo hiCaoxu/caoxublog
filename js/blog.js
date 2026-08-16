@@ -3,7 +3,8 @@
    ============================================ */
 
 let currentBlogId = null;
-let blogs = [];
+let blogs = [];                  // 未归档博客（列表/搜索/标签/分页使用）
+let allBlogs = [];               // 全部博客（含已归档，用于详情页与深链打开）
 let filteredBlogs = [];          // 经过搜索/标签筛选后的列表
 let activeTag = '';              // 当前选中的标签（'' 表示全部）
 let searchKeyword = '';          // 当前搜索关键词
@@ -12,7 +13,9 @@ const PAGE_SIZE = 10;            // 每页显示数量
 
 (async function () {
     try {
-        blogs = await loadBlogs();
+        allBlogs = await loadBlogs();
+        // 列表只展示未归档博客；已归档内容仅在归档页（archive.html）展示
+        blogs = getActiveBlogs(allBlogs);
 
         // 按创建时间倒序排列
         blogs.sort((a, b) => b.createdAt - a.createdAt);
@@ -173,7 +176,8 @@ function renderBlogList() {
 }
 
 async function openBlogDetail(blogId) {
-    const blog = blogs.find(b => b.id === blogId);
+    // 归档文章不在列表中，需从全量数据中查找（支持归档页深链打开）
+    const blog = allBlogs.find(b => b.id === blogId) || blogs.find(b => b.id === blogId);
     if (!blog) {
         alert('文章不存在');
         return;
@@ -232,10 +236,10 @@ function renderBlogDetail(blog, loading) {
     const viewCount = loading ? 0 : incrementViewCount(blog.id);
     const likeState = getLikeState(blog.id);
 
-    // 上一篇 / 下一篇（基于倒序列表）
+    // 上一篇 / 下一篇（基于未归档列表；归档文章不提供导航，避免跳回普通列表）
     let prevHtml = '<span class="nav-placeholder"></span>';
     let nextHtml = '<span class="nav-placeholder"></span>';
-    if (!loading) {
+    if (!loading && !blog.archived) {
         const idx = blogs.findIndex(b => b.id === blog.id);
         if (idx > 0) {
             const prev = blogs[idx - 1];

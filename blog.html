@@ -60,11 +60,19 @@
 
             <!-- 搜索 + 标签筛选 -->
             <div class="blog-toolbar">
-                <div class="search-box">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input type="text" id="blogSearch" placeholder="搜索标题、摘要或标签..." aria-label="搜索博客">
+                <div class="toolbar-top">
+                    <div class="search-box">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" id="blogSearch" placeholder="搜索标题、摘要或标签..." aria-label="搜索博客">
+                    </div>
+                    <a class="archive-btn" href="archive.html?type=blog" title="查看已归档的博客文章">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        归档
+                    </a>
                 </div>
                 <div class="tag-filter" id="tagFilter"></div>
             </div>

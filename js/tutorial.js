@@ -3,19 +3,31 @@
    ============================================ */
 
 let currentTutorialId = null;
-let tutorials = [];
+let tutorials = [];              // 未归档教程（目录树/导航使用）
+let allTutorials = [];           // 全部教程（含已归档，用于归档页深链打开）
 
 (async function () {
     try {
-        tutorials = await loadTutorials();
-        sortTutorialTree(tutorials);
+        allTutorials = await loadTutorials();
+        sortTutorialTree(allTutorials);
+        // 目录树只展示未归档教程；已归档内容仅在归档页（archive.html）展示
+        tutorials = filterArchivedFromTree(allTutorials);
         renderFolderTree(tutorials);
 
-        // 默认显示第一篇文章
-        const firstArticle = findFirstArticle(tutorials);
-        if (firstArticle) {
-            openTutorialArticle(firstArticle.id);
-            highlightTreeArticle(firstArticle.id);
+        // 优先打开 URL 指定的文章（可能已归档，从全量数据查找）
+        const params = new URLSearchParams(window.location.search);
+        const targetId = params.get('id');
+        const target = targetId ? findArticleById(allTutorials, targetId) : null;
+
+        if (target) {
+            openTutorialArticle(target.id);
+        } else {
+            // 默认显示第一篇未归档文章
+            const firstArticle = findFirstArticle(tutorials);
+            if (firstArticle) {
+                openTutorialArticle(firstArticle.id);
+                highlightTreeArticle(firstArticle.id);
+            }
         }
     } catch (e) {
         console.error('教程加载失败:', e);
@@ -23,6 +35,22 @@ let tutorials = [];
         showLoadError('tutorialContent');
     }
 })();
+
+// 过滤掉已归档文章（递归）；文件夹下无可见文章则整体隐藏
+function filterArchivedFromTree(items) {
+    const result = [];
+    (items || []).forEach(item => {
+        if (item.type === 'article') {
+            if (!item.archived) result.push(item);
+        } else if (item.type === 'folder') {
+            const children = filterArchivedFromTree(item.children || []);
+            if (children.length > 0) {
+                result.push({ ...item, children });
+            }
+        }
+    });
+    return result;
+}
 
 // 按文件名正序排列文章（文件夹保持声明顺序在前）
 function sortTutorialTree(items) {

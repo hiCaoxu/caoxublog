@@ -26,7 +26,8 @@ async function loadBlogs() {
         file: item.file,
         createdAt: new Date(item.createdAt.replace(' ', 'T')).getTime(),
         updatedAt: new Date(item.updatedAt.replace(' ', 'T')).getTime(),
-        pinned: !!item.pinned
+        pinned: !!item.pinned,
+        archived: !!item.archived
     }));
     return blogsCache;
 }
@@ -278,18 +279,60 @@ function showLoadError(containerId) {
 // 博客筛选工具
 // ============================================
 
-// 获取置顶博客（最多3条）
+// 获取置顶博客（最多3条，排除已归档）
 function getPinnedBlogs(blogs) {
     return blogs
-        .filter(b => b.pinned)
+        .filter(b => b.pinned && !b.archived)
         .sort((a, b) => b.updatedAt - a.updatedAt)
         .slice(0, 3);
 }
 
-// 获取最新博客（按时间倒序，6条，排除置顶避免重复展示）
+// 获取最新博客（按时间倒序，6条，排除置顶与已归档避免重复展示）
 function getLatestBlogs(blogs) {
     return [...blogs]
-        .filter(b => !b.pinned)
+        .filter(b => !b.pinned && !b.archived)
         .sort((a, b) => b.createdAt - a.createdAt)
         .slice(0, 6);
+}
+
+// 获取未归档博客（正常列表/搜索/标签/分页使用）
+function getActiveBlogs(blogs) {
+    return blogs.filter(b => !b.archived);
+}
+
+// 获取已归档博客（归档页展示）
+function getArchivedBlogs(blogs) {
+    return blogs.filter(b => b.archived);
+}
+
+// 深度遍历教程树，收集已归档文章（携带所属文件夹路径，用于归档页展示）
+function flattenArchivedArticles(items, folderPath) {
+    const result = [];
+    (items || []).forEach(item => {
+        if (item.type === 'article') {
+            if (item.archived) {
+                result.push({
+                    id: item.id,
+                    name: item.name,
+                    file: item.file,
+                    folderPath: folderPath || ''
+                });
+            }
+        } else if (item.type === 'folder' && item.children) {
+            const path = folderPath ? folderPath + ' / ' + item.name : item.name;
+            result.push(...flattenArchivedArticles(item.children, path));
+        }
+    });
+    return result;
+}
+
+// 兼容 Node.js 测试环境（浏览器中 module 未定义，不影响原有行为）
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        getPinnedBlogs,
+        getLatestBlogs,
+        getActiveBlogs,
+        getArchivedBlogs,
+        flattenArchivedArticles
+    };
 }

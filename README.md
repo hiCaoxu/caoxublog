@@ -7,6 +7,7 @@
 - **首页**：置顶博客区（最多 3 条）+ 最新博客区（按创建时间倒序 6 条，自动排除置顶避免重复）
 - **博客页**：按创建时间倒序排列；支持**关键词搜索**、**标签筛选**与**分页**（每页 10 条）；详情页 Markdown 渲染，展示创建/修改时间、阅读量、点赞，并提供上一篇/下一篇导航；URL 参数（`?id=`）同步与返回按钮
 - **教程页**：左侧三级目录树（文件夹可折叠，文章按文件名正序），默认打开第一篇并高亮当前文章；右侧评论区
+- **归档页**：集中展示已归档内容；博客/教程页均有归档按钮（`archive.html?type=blog|tutorial` 预选 Tab）；归档后文章自动从首页、博客列表、教程目录中隐藏，仅在归档页可见
 - **关于我页**：Markdown 渲染个人信息
 - **代码块**：语言标签 + 行号 + 一键复制按钮 + [highlight.js](https://highlightjs.org/) 语法高亮（CDN 引入，亮/暗两套样式随站点主题自动切换）
 - **主题切换**：暗色 / 亮色一键切换；记忆用户选择，未手动设置时自动跟随系统偏好（`prefers-color-scheme`）
@@ -38,9 +39,10 @@ caoxublog/
 ├── index.html              # 首页
 ├── blog.html               # 博客页
 ├── tutorial.html           # 教程页
+├── archive.html            # 归档页（已归档博客/教程）
 ├── about.html              # 关于我页
 ├── blogs/                  # 博客 Markdown 文件
-│   ├── index.json          # 博客清单（标题/摘要/时间/置顶/可选标签）
+│   ├── index.json          # 博客清单（标题/摘要/时间/置顶/归档/可选标签）
 │   ├── 01-static-blog.md
 │   └── ...
 ├── tutorials/              # 教程 Markdown 文件（支持三级文件夹）
@@ -48,18 +50,20 @@ caoxublog/
 │   ├── frontend-basics/
 │   └── javascript/
 ├── css/
-│   ├── style.css           # 全局样式（导航/卡片/Markdown/评论区/主题变量）
+│   ├── style.css           # 全局样式（导航/卡片/Markdown/评论区/主题变量/归档按钮）
 │   ├── blog.css            # 博客页布局
 │   ├── tutorial.css        # 教程页布局
+│   ├── archive.css         # 归档页布局
 │   ├── about.css           # 关于我页
 │   └── mouse-trail.css     # 鼠标光点特效
 ├── js/
-│   ├── data.js             # 数据加载（fetch 清单和 md）+ 评论/点赞/阅读量存储 + Waline 配置
+│   ├── data.js             # 数据加载（fetch 清单和 md）+ 评论/点赞/阅读量存储 + 归档筛选工具 + Waline 配置
 │   ├── utils.js            # Markdown 渲染器 + 代码块增强 + 敏感词过滤 + 工具函数
 │   ├── theme.js            # 暗色/亮色主题切换
 │   ├── home.js             # 首页逻辑（置顶 + 最新）
 │   ├── blog.js             # 博客页逻辑（搜索/标签/分页/详情/评论）
 │   ├── tutorial.js         # 教程页逻辑（目录树/文章切换/评论）
+│   ├── archive.js          # 归档页逻辑（Tab 切换/归档列表渲染）
 │   ├── about.js            # 关于我页逻辑
 │   ├── waline.js           # Waline 评论系统集成（可选）
 │   └── mouse-trail.js      # 鼠标光点特效
@@ -100,21 +104,31 @@ npx serve .
 - 修改：直接编辑 md 文件，运行脚本后 `updatedAt` 自动更新为文件修改时间
 - 删除：删除 md 文件，运行脚本后清单条目自动移除
 
+### 归档文章
+
+将文章从公开列表（首页 / 博客列表 / 教程目录）中隐藏，仅在归档页（`archive.html`）可见：
+
+1. 博客：在 `blogs/index.json` 中将该条目 `archived` 改为 `true`
+2. 教程：在 `tutorials/index.json` 中将该文章节点的 `archived` 改为 `true`
+3. 运行 `node build-index.js` 后标记保留（不会因重新生成清单而丢失）
+
+取消归档改为 `false` 即可。归档文章仍可通过归档页点击阅读（跳转 `blog.html?id=` / `tutorial.html?id=`），但不再出现在列表与导航中。
+
 ### `build-index.js` 的保留规则
 
-- 博客按文件名匹配：`id`、`title`、`excerpt`、`createdAt`、`pinned` 全部保留，仅 `updatedAt` 跟随文件修改时间
-- 教程按文件路径匹配：文件夹中文名、文章名保留
+- 博客按文件名匹配：`id`、`title`、`excerpt`、`createdAt`、`pinned`、`archived` 全部保留，仅 `updatedAt` 跟随文件修改时间
+- 教程按文件路径匹配：文件夹中文名、文章名、`archived` 保留
 - 注意：git clone、解压 zip 等操作会刷新文件 mtime，导致所有 `updatedAt` 变为同一时间，此时需手动修正清单
 
 ## 测试
 
-Markdown 渲染器（含 XSS 协议白名单）使用 Node 内置 test runner 做单元测试，零第三方依赖：
+Markdown 渲染器（含 XSS 协议白名单）与归档数据工具函数使用 Node 内置 test runner 做单元测试，零第三方依赖：
 
 ```bash
 npm test          # 等价于 node --test
 ```
 
-覆盖：协议白名单（http/https/mailto/tel + 站内相对路径）、危险协议拦截（javascript/data/vbscript/file）、HTML 实体与双重编码混淆绕过、属性引号逃逸、标签/alt 文本转义，以及标题、列表、引用、表格、代码块（CRLF 兼容）等基础语法回归。
+覆盖：协议白名单（http/https/mailto/tel + 站内相对路径）、危险协议拦截（javascript/data/vbscript/file）、HTML 实体与双重编码混淆绕过、属性引号逃逸、标签/alt 文本转义、归档过滤（`getActiveBlogs` / `getArchivedBlogs` / `flattenArchivedArticles`），以及标题、列表、引用、表格、代码块（CRLF 兼容）等基础语法回归。
 
 ## 评论与统计
 

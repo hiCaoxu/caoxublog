@@ -335,6 +335,33 @@ body {
 /* ============================================
    按钮
    ============================================ */
+/* 归档按钮（博客/教程/归档页共用） */
+.archive-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all var(--transition);
+}
+
+.archive-btn .icon {
+    width: 16px;
+    height: 16px;
+}
+
+.archive-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+}
+
 .btn-primary {
     display: inline-flex;
     align-items: center;

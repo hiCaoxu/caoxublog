@@ -135,6 +135,17 @@
     margin-bottom: 24px;
 }
 
+/* 搜索框 + 归档按钮横向布局 */
+.toolbar-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toolbar-top .search-box {
+    flex: 1;
+}
+
 .search-box {
     position: relative;
     display: flex;
