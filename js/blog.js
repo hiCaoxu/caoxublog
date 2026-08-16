@@ -1,5 +1,5 @@
 /* ============================================
-   CaoxuBlog - 博客页面逻辑
+   点工Caoxu - 博客页面逻辑
    ============================================ */
 
 let currentBlogId = null;
@@ -204,7 +204,7 @@ async function openBlogDetail(blogId, push = true) {
     document.getElementById('commentSidebar').style.display = 'block';
 
     // 动态更新页面标题与描述（SEO / 分享预览）
-    document.title = blog.title + ' - CaoxuBlog';
+    document.title = blog.title + ' - 点工Caoxu';
     setMetaDescription(blog.excerpt || blog.title);
 
     // 更新 URL 参数（pushState 压栈以支持后退，replaceState 仅替换）
@@ -250,8 +250,8 @@ function closeBlogDetail(push = true) {
     currentBlogId = null;
     document.getElementById('blogDetail').style.display = 'none';
     document.getElementById('commentSidebar').style.display = 'none';
-    document.title = 'CaoxuBlog - 博客';
-    setMetaDescription('CaoxuBlog 博客文章列表，包含测试技术与前端开发经验分享');
+    document.title = '点工Caoxu - 博客';
+    setMetaDescription('点工Caoxu 博客文章列表，包含测试技术与前端开发经验分享');
     if (push) {
         history.pushState({}, '', 'blog.html');
     } else {

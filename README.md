@@ -1,4 +1,4 @@
-# CaoxuBlog
+# 点工Caoxu
 
 一个纯静态的个人博客系统，使用原生 HTML、CSS 和 JavaScript 构建，零框架、零构建工具。博客与教程内容以 Markdown 文件管理，配合清单 JSON 和自动生成脚本，实现"改文件即发布"的轻量内容工作流。
 

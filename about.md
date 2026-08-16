@@ -33,7 +33,7 @@
 
 ## 关于本站
 
-CaoxuBlog 是一个纯静态博客，使用原生 HTML、CSS 和 JavaScript 构建，无需任何框架或构建工具。
+点工Caoxu 是一个纯静态博客，使用原生 HTML、CSS 和 JavaScript 构建，无需任何框架或构建工具。
 
 技术特点：
 - 博客和教程以 Markdown 文件管理，直接修改文件即可更新内容
