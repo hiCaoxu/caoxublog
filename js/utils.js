@@ -464,7 +464,8 @@ function loadHighlightJs() {
     if (!highlightScriptPromise) {
         highlightScriptPromise = new Promise((resolve, reject) => {
             const s = document.createElement('script');
-            s.src = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js';
+            // 自托管（vendor/），避免依赖境外 CDN（jsDelivr 在中国大陆经常不可达）
+            s.src = 'vendor/highlightjs/highlight.min.js';
             s.onload = () => resolve();
             s.onerror = () => reject(new Error('highlight.js 加载失败'));
             document.head.appendChild(s);

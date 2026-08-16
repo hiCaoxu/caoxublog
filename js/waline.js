@@ -76,7 +76,9 @@ async function initWaline(pageId) {
 function loadWalineScript() {
     return new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = 'https://unpkg.com/@waline/client@v3/dist/waline.js';
+        // 自托管 UMD 构建（vendor/waline/），避免依赖境外 CDN（unpkg 在中国大陆经常不可达）。
+        // 注意：必须使用 UMD 构建（waline.umd.js），ESM 构建（waline.js）无法直接用经典 <script> 加载。
+        script.src = 'vendor/waline/waline.js';
         script.onload = resolve;
         script.onerror = () => reject(new Error('Waline 脚本加载失败'));
         document.head.appendChild(script);
@@ -84,7 +86,7 @@ function loadWalineScript() {
         // 加载 Waline 样式
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/@waline/client@v3/dist/waline.css';
+        link.href = 'vendor/waline/waline.css';
         document.head.appendChild(link);
     });
 }

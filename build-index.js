@@ -45,7 +45,8 @@ function stripPrefix(fileBase) {
 // ============================================
 function buildBlogsIndex() {
     const indexFile = path.join(BLOGS_DIR, 'index.json');
-    const existing = readJsonSafe(indexFile, []);
+    backupIndexIfReadable(indexFile);
+    const existing = safeReadIndex(indexFile, []);
     const byFile = new Map(existing.map(e => [e.file, e]));
 
     const mdFiles = fs.readdirSync(BLOGS_DIR)
@@ -167,7 +168,8 @@ function scanTutorialDir(dirAbs, dirRel, folderMap, articleMap, depth, logs) {
 
 function buildTutorialsIndex() {
     const indexFile = path.join(TUTORIALS_DIR, 'index.json');
-    const existing = readJsonSafe(indexFile, []);
+    backupIndexIfReadable(indexFile);
+    const existing = safeReadIndex(indexFile, []);
 
     const folderMap = new Map();
     const articleMap = new Map();
@@ -190,11 +192,71 @@ function buildTutorialsIndex() {
 
 const utils = require('./js/utils.js');
 
-// 站点域名（部署后改为实际地址，用于 sitemap / canonical / og 的绝对 URL）
-const SITE_URL = 'https://hiCaoxu.github.io/caoxublog';
-// 静态资源版本号（与各 HTML 页面中的 ?v= 保持一致）
-const ASSET_VERSION = '20260810';
+// 站点域名（用于 sitemap / canonical / og 的绝对 URL）
+// 部署到腾讯云等任意服务器时，请用环境变量指定真实域名，例如：
+//   SITE_URL=https://blog.example.com node build-index.js
+// 未设置时使用占位域名，并给出警告，避免把 GitHub Pages 地址写进生产站点。
+const SITE_URL = process.env.SITE_URL
+    || (console.warn('⚠️  未设置 SITE_URL 环境变量，sitemap/canonical/RSS 将使用占位域名 https://your-domain.example.com，请在部署前通过 SITE_URL 指定真实域名。'), 'https://your-domain.example.com');
+
+// 静态资源版本号（与各 HTML 页面中的 ?v= 保持一致，用于强制浏览器刷新缓存）
+// 默认取当前日期 YYYYMMDD，每次构建自动变化，免去手动递增；也可用环境变量覆盖：
+//   ASSET_VERSION=20260816 node build-index.js
+function todayVersion() {
+    const d = new Date();
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}`;
+}
+const ASSET_VERSION = process.env.ASSET_VERSION || todayVersion();
 const POST_DIR = path.join(ROOT, 'post');
+
+// ============================================
+// 资源版本号自动同步
+// 把 5 个主 HTML 页面里的 ?v=XXXX 统一替换为 ASSET_VERSION，
+// 并在生成静态文章页时使用同一版本号，保证发布后访客拉取的是最新 JS/CSS。
+// ============================================
+const MAIN_PAGES = ['index.html', 'blog.html', 'tutorial.html', 'about.html', 'archive.html'];
+function rewriteAssetVersions() {
+    MAIN_PAGES.forEach(page => {
+        const file = path.join(ROOT, page);
+        if (!fs.existsSync(file)) return;
+        const html = fs.readFileSync(file, 'utf8');
+        // 仅替换 ?v=<token> 形式的缓存戳；不影响其它查询参数
+        const next = html.replace(/(\?v=)[^"']*/g, `$1${ASSET_VERSION}`);
+        if (next !== html) {
+            fs.writeFileSync(file, next, 'utf8');
+            console.log(`  [版本戳] ${page} 的 ?v= 已更新为 ${ASSET_VERSION}`);
+        }
+    });
+}
+
+// ============================================
+// index.json 安全读写（防元数据丢失）
+// 读取失败（文件损坏）时先备份为 .corrupt 再回退为空数组；
+// 写入前若原文件可正常解析，先备份为 .bak，便于误操作/损坏后恢复。
+// ============================================
+function safeReadIndex(file, fallback) {
+    if (!fs.existsSync(file)) return fallback;
+    try {
+        return JSON.parse(fs.readFileSync(file, 'utf8'));
+    } catch (e) {
+        const corrupt = file + '.corrupt';
+        try { fs.copyFileSync(file, corrupt); } catch (_) { /* ignore */ }
+        console.warn(`⚠️  ${file} 解析失败，已备份为 ${path.basename(corrupt)} 并重新生成（手动填写的标题/标签等可能丢失，请用 .bak 恢复）`);
+        return fallback;
+    }
+}
+
+function backupIndexIfReadable(file) {
+    if (!fs.existsSync(file)) return;
+    try {
+        JSON.parse(fs.readFileSync(file, 'utf8')); // 仅校验可解析
+        const bak = file + '.bak';
+        fs.copyFileSync(file, bak);
+    } catch (e) {
+        // 已损坏则不再备份（由 safeReadIndex 处理为 .corrupt）
+    }
+}
 
 // 教程树扁平化：收集文章并携带所属文件夹路径
 function flattenTreeArticles(items, folderPath) {
@@ -244,8 +306,8 @@ function renderArticlePage(article) {
     <meta property="og:url" content="${canonical}">
     <link rel="stylesheet" href="../css/style.css?v=${ASSET_VERSION}">
     <link rel="stylesheet" href="../css/blog.css?v=${ASSET_VERSION}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css" id="hljs-light">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-dark" disabled>
+    <link rel="stylesheet" href="../vendor/highlightjs/github.min.css" id="hljs-light">
+    <link rel="stylesheet" href="../vendor/highlightjs/github-dark.min.css" id="hljs-dark" disabled>
 </head>
 <body>
     <nav class="navbar">
@@ -425,6 +487,8 @@ function buildSearchIndex() {
 // 执行
 // ============================================
 console.log('正在生成 index.json、静态页与搜索索引 ...\n');
+console.log(`配置：SITE_URL=${SITE_URL}  ASSET_VERSION=${ASSET_VERSION}\n`);
+rewriteAssetVersions();
 buildBlogsIndex();
 buildTutorialsIndex();
 buildArticlePages();

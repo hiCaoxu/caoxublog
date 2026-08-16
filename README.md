@@ -26,10 +26,10 @@
 | 前端 | 原生 HTML5 / CSS3 / JavaScript（ES6+），零框架零依赖 |
 | 内容 | Markdown 文件 + `index.json` 清单，浏览器端 `fetch` 实时加载（`cache: 'no-cache'` 保证发布即时生效） |
 | Markdown 渲染 | 自研行扫描解析器（`js/utils.js`），支持标题、列表、代码块、表格、引用、图片、链接、行内格式 |
-| 代码高亮 | highlight.js 11（jsDelivr CDN），脚本按需懒加载，亮/暗双主题随站点主题切换 |
+| 代码高亮 | highlight.js 11（**自托管于 `vendor/highlightjs/`**，不再依赖境外 CDN），脚本按需懒加载，亮/暗双主题随站点主题切换 |
 | 主题系统 | CSS 变量 + `<html data-theme>` 属性，localStorage 记忆 + 跟随系统偏好 |
 | 数据持久化 | 评论、点赞、阅读量、主题均存于访客浏览器 localStorage（`safeStorage*` 容错封装） |
-| 评论（可选） | Waline v3（unpkg CDN 按需加载），需自建服务端 |
+| 评论（可选） | Waline v3（**自托管 UMD 构建于 `vendor/waline/`**，不再依赖 unpkg），需自建服务端 |
 | 内容索引生成 | Node.js 脚本 `build-index.js`（零依赖），生成清单 + 静态页 + 搜索索引 + `sitemap.xml`/`robots.txt`/`feed.xml` |
 | 单元测试 | Node 内置 test runner（`node:test`，零第三方依赖） |
 | CI | GitHub Actions（push/PR 触发 `node --test` + `build-index.js` 冒烟） |
@@ -173,30 +173,39 @@ npm test          # 等价于 node --test
    const WALINE_SERVER = 'https://waline.your-domain.com';
    ```
 
-3. 留空 `''` 则自动回退到内置本地评论。启用后，博客 / 教程详情页的评论区、点赞 reaction 与阅读量（pageview）均由 Waline 接管（前端脚本与样式由 unpkg CDN 按需加载）
+3. 留空 `''` 则自动回退到内置本地评论。启用后，博客 / 教程详情页的评论区、点赞 reaction 与阅读量（pageview）均由 Waline 接管。Waline 前端脚本与样式已**自托管在 `vendor/waline/`**（UMD 构建），不再从 unpkg 加载，中国大陆访问稳定。
 
 ## 部署
 
-本项目是纯静态站点，可部署到任何静态托管服务：
+本项目是纯静态站点，**所有前端依赖（highlight.js、Waline）均已自托管在 `vendor/` 目录，不再依赖任何境外 CDN（jsDelivr / unpkg）**，因此在中国大陆（含腾讯云）网络环境下可稳定加载。可部署到任意静态托管服务：
 
-- **腾讯云轻量应用服务器 + Nginx**：上传整个目录到 `/var/www/caoxublog`，Nginx `root` 指向该目录即可
-- **腾讯云 COS 静态网站托管** / **EdgeOne Pages** / **GitHub Pages**：直接上传全部文件
+- **腾讯云轻量应用服务器 / CVM + Nginx**：上传整个目录到 `/var/www/caoxublog`，参考 `nginx.conf.example` 配置（已含 HTTPS 跳转、gzip、安全头、自托管 CSP）。
+- **腾讯云 COS 静态网站托管** / **EdgeOne Pages**：直接上传全部文件（含 `vendor/`、`post/` 生成产物）。EdgeOne Pages 构建命令填 `node build-index.js`、输出目录为项目根；COS 在控制台配置缓存规则（见 `nginx.conf.example` 末尾说明）。
+- **GitHub Pages** 等：同样适用。
 
-注意：发布前记得先运行 `node build-index.js` 更新清单、静态页与 SEO 文件。
+发布前必须运行一次 `node build-index.js` 更新清单、静态页与 SEO 文件（见下文环境变量）。
 
 ### 站点域名配置（sitemap / canonical / RSS）
 
-`build-index.js` 顶部有一个 `SITE_URL` 常量，默认值为 GitHub Pages 地址：
+`build-index.js` 通过环境变量读取站点域名，**不再硬编码**：
 
-```js
-const SITE_URL = 'https://hiCaoxu.github.io/caoxublog';
+```bash
+SITE_URL=https://blog.your-domain.com node build-index.js
 ```
 
-`sitemap.xml`、`robots.txt`、`feed.xml` 以及每篇文章的 `canonical` / `og:url` 都基于它生成**绝对地址**。部署到其他域名时，请把 `SITE_URL` 改成实际站点地址后重新运行脚本。
+`sitemap.xml`、`robots.txt`、`feed.xml` 以及每篇文章的 `canonical` / `og:url` 都基于它生成**绝对地址**。未设置 `SITE_URL` 时脚本会告警并使用占位域名，请在部署前务必指定真实域名后重新运行。
+
+### 资源版本与缓存刷新
+
+`build-index.js` 的 `ASSET_VERSION` 默认取**当前日期（YYYYMMDD）**，每次构建自动变化，并会把 5 个主 HTML 页面里的 `?v=` 统一替换为该版本号（无需手动递增）。如需强制刷新，可用环境变量覆盖：`ASSET_VERSION=20260816 node build-index.js`。带版本号的 JS/CSS 走长缓存，页面与数据 `no-cache`，发布即时生效。
+
+### 索引文件防丢失
+
+运行 `build-index.js` 时，若 `blogs/index.json` / `tutorials/index.json` 可正常解析，会先备份为同名 `.bak`；若文件损坏无法解析，会备份为 `.corrupt` 并基于 md 文件重新生成（此时手填的标题/标签等会丢失）。恢复方式：用最近的 `.bak` 覆盖原文件后重新运行脚本即可。`.bak` / `.corrupt` 已被 `.gitignore` 忽略，不会提交。
 
 ### Nginx 部署参考
 
-项目根目录提供了 `nginx.conf.example`：包含 gzip 压缩、静态资源缓存策略（带版本号的 JS/CSS 长缓存、页面与数据不缓存）、安全响应头（`X-Content-Type-Options` / `X-Frame-Options` / `Referrer-Policy`，以及可选的 CSP 示例）。部署到 Nginx 时按需修改域名与证书路径即可。
+项目根目录提供了 `nginx.conf.example`（已针对腾讯云优化）：包含 HTTP→HTTPS 跳转、gzip、静态资源长缓存与数据不缓存、安全响应头（`X-Content-Type-Options` / `X-Frame-Options` / `Referrer-Policy` / `X-XSS-Protection`，以及可开启的 HSTS 与严格 CSP）。由于依赖已全部自托管，CSP 可设为 `default-src 'self'`；注意 `post/*.html` 静态文章页含一段内联脚本，故 `script-src` 保留 `'unsafe-inline'`。部署时按需修改 `server_name` 与证书路径，复制为 `/etc/nginx/conf.d/caoxublog.conf` 后 `nginx -t && systemctl reload nginx`。
 
 ### 持续集成（CI）
 
@@ -204,7 +213,7 @@ const SITE_URL = 'https://hiCaoxu.github.io/caoxublog';
 
 ### 浏览器缓存
 
-更新代码后访客浏览器可能仍使用缓存的旧版脚本/样式。本站已在所有本地 CSS/JS 引用上加了版本号参数（如 `css/style.css?v=20260806`）：**发布更新后，将 5 个 HTML 页面中的 `?v=` 值递增一次**（可用当天日期），即可强制访客浏览器拉取新版资源；数据清单（`index.json`）本身通过 `fetch` 的 `cache: 'no-cache'` 每次都做新鲜度校验，无需处理。开发者本机调试时，直接 Ctrl+F5 强制刷新即可。
+更新代码后访客浏览器可能仍使用缓存的旧版脚本/样式。本站所有本地 CSS/JS 引用均带版本号参数（如 `css/style.css?v=20260816`）。**每次运行 `node build-index.js` 会自动把 5 个主 HTML 页面里的 `?v=` 统一刷新为当天日期**（可用 `ASSET_VERSION=20260816` 环境变量强制指定），无需手动逐个修改即可强制访客拉取新版资源；带版本号的 JS/CSS 走长缓存，页面与数据 `no-cache`，发布即时生效。开发者本机调试时，直接 Ctrl+F5 强制刷新即可。
 
 ## 开发历程
 
@@ -224,6 +233,7 @@ const SITE_URL = 'https://hiCaoxu.github.io/caoxublog';
 14. **交互完善**：详情页改用 `pushState`/`popstate` 支持浏览器前进后退；去除内联 `onclick` 改为事件委托；补齐 aria（`aria-current` / `aria-expanded` / `aria-pressed` / `aria-hidden`）
 15. **SEO 与阅读体验**：生成静态文章页 + sitemap/RSS；详情页动态 title/meta；文章目录（TOC）与图片懒加载
 16. **性能与工程化收尾**：highlight.js 改为按需懒加载；新增全文搜索（博客正文 + 教程搜索）；本地评论加条数上限；消除 about.md 双写；补充 `.gitignore`、Nginx 示例、GitHub Actions CI
+17. **腾讯云适配（依赖自托管与构建可配置化）**：将 highlight.js 与 Waline 自托管至 `vendor/`，彻底移除 jsDelivr / unpkg 等境外 CDN 依赖（其中 Waline 由错误的 ESM 构建改为 UMD 构建，修复经典 `<script>` 加载报错）；`build-index.js` 的 `SITE_URL` / `ASSET_VERSION` 改为环境变量驱动并自动刷新 HTML 版本戳；`blogs/index.json` / `tutorials/index.json` 增加损坏备份（`.bak` / `.corrupt`）；`nginx.conf.example` 针对腾讯云加固（HTTPS 跳转、安全响应头、自托管 CSP）；部署与 README 文档同步更新
 
 ## AI 协作说明
 

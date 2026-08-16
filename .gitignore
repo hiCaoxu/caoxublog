@@ -12,3 +12,13 @@ desktop.ini
 .vscode/
 .idea/
 *.swp
+
+# build-index.js 生成的索引备份（损坏时自动留存，便于恢复，勿提交）
+*.json.bak
+*.json.corrupt
+
+# WorkBuddy 项目内部数据（记忆/日志等，非博客代码，勿提交）
+.workbuddy/
+
+# 可选：若希望把自托管的 vendor 目录也纳入版本管理则删除下行
+# vendor/
