@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="解构赋值与展开运算符">
+    <title>解构赋值与展开运算符 - CaoxuBlog</title>
+    <link rel="canonical" href="https://hiCaoxu.github.io/caoxublog/post/tut-2-1-2.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="解构赋值与展开运算符">
+    <meta property="og:description" content="解构赋值与展开运算符">
+    <meta property="og:url" content="https://hiCaoxu.github.io/caoxublog/post/tut-2-1-2.html">
+    <link rel="stylesheet" href="../css/style.css?v=20260809">
+    <link rel="stylesheet" href="../css/blog.css?v=20260809">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css" id="hljs-light">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-dark" disabled>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="logo-text">
+                    <span class="logo-name">CaoxuBlog</span>
+                    <span class="logo-tagline">代码永远在等待一个它从未通过的测试</span>
+                </span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../blog.html">博客</a></li>
+                <li><a href="../tutorial.html">教程</a></li>
+                <li><a href="../about.html">关于我</a></li>
+                <li>
+                    <button class="theme-toggle" type="button" aria-label="切换主题">
+                        <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                        <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="static-article-page">
+        <article class="blog-article">
+            <div class="article-header">
+                <a class="back-btn" href="../tutorial.html">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    返回教程目录
+                </a>
+                <h1 class="article-title">解构赋值与展开运算符</h1>
+                <div class="article-meta">
+                    
+                    
+                    <span class="article-breadcrumb">JavaScript / ES6+ 新特性</span>
+                    
+                </div>
+            </div>
+            <nav class="toc" id="articleToc" style="display:none;"></nav>
+            <div class="markdown-body"><h1 id="heading-1">解构赋值与展开运算符</h1>
+<h2 id="heading-2">数组解构</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">javascript</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</div><pre><code class="language-javascript">const arr = [1, 2, 3];
+const [a, b, c] = arr;
+// a = 1, b = 2, c = 3
+
+// 跳过元素
+const [first, , third] = [1, 2, 3];
+
+// 默认值
+const [x = 0, y = 0] = [5];
+// x = 5, y = 0
+
+// 交换变量
+let m = 1, n = 2;
+[m, n] = [n, m];</code></pre></div></div>
+<h2 id="heading-3">对象解构</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">javascript</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</div><pre><code class="language-javascript">const user = { name: &#039;Caoxu&#039;, age: 25, city: &#039;北京&#039; };
+const { name, age } = user;
+
+// 重命名
+const { name: userName, age: userAge } = user;
+
+// 默认值
+const { role = &#039;user&#039; } = user;
+
+// 嵌套解构
+const { address: { city, country } } = complexObj;</code></pre></div></div>
+<h2 id="heading-4">展开运算符</h2>
+<h3 id="heading-5">数组展开</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">javascript</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6
+7
+8
+9</div><pre><code class="language-javascript">const arr1 = [1, 2, 3];
+const arr2 = [4, 5, 6];
+const combined = [...arr1, ...arr2];
+
+// 复制数组
+const copy = [...arr1];
+
+// 函数参数
+Math.max(...[1, 2, 3, 4, 5]);</code></pre></div></div>
+<h3 id="heading-6">对象展开</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">javascript</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6
+7</div><pre><code class="language-javascript">const defaults = { theme: &#039;light&#039;, lang: &#039;zh&#039; };
+const userSettings = { theme: &#039;dark&#039; };
+const settings = { ...defaults, ...userSettings };
+// { theme: &#039;dark&#039;, lang: &#039;zh&#039; }
+
+// Rest 参数
+const { id, ...rest } = user;</code></pre></div></div>
+<h2 id="heading-7">实战应用</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">javascript</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6
+7
+8
+9</div><pre><code class="language-javascript">// 函数参数解构
+function createUser({ name, email, role = &#039;user&#039; }) {
+    return { name, email, role, createdAt: new Date() };
+}
+
+// 合并配置
+function mergeConfig(...configs) {
+    return Object.assign({}, ...configs);
+}</code></pre></div></div>
+<h2 id="heading-8">总结</h2>
+<p>解构赋值和展开运算符让 JavaScript 代码更简洁优雅，是现代前端开发的基本功。</p></div>
+            <div class="post-nav"><a class="post-nav-link prev" href="tut-2-1-1.html"><span class="nav-dir">上一篇</span><span class="nav-title">箭头函数与模板字符串</span></a><a class="post-nav-link next" href="tut-2-2.html"><span class="nav-dir">下一篇</span><span class="nav-title">DOM 操作基础</span></a></div>
+            <p class="article-comment-link"><a href="../tutorial.html?id=tut-2-1-2">参与评论（互动版）→</a></p>
+        </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <script src="../js/data.js?v=20260809"></script>
+    <script src="../js/utils.js?v=20260809"></script>
+    <script src="../js/theme.js?v=20260809"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.enhanceCodeBlocks) enhanceCodeBlocks(document.body);
+            if (window.buildToc) buildToc(document.body, document.getElementById('articleToc'));
+        });
+    </script>
+</body>
+</html>

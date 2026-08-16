@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="深入理解 CSS Grid 布局系统，从基本概念到实战应用，掌握现代 Web 布局的核心技术。">
+    <title>CSS Grid 布局完全指南 - CaoxuBlog</title>
+    <link rel="canonical" href="https://hiCaoxu.github.io/caoxublog/post/blog-2.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="CSS Grid 布局完全指南">
+    <meta property="og:description" content="深入理解 CSS Grid 布局系统，从基本概念到实战应用，掌握现代 Web 布局的核心技术。">
+    <meta property="og:url" content="https://hiCaoxu.github.io/caoxublog/post/blog-2.html">
+    <link rel="stylesheet" href="../css/style.css?v=20260809">
+    <link rel="stylesheet" href="../css/blog.css?v=20260809">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css" id="hljs-light">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-dark" disabled>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="logo-text">
+                    <span class="logo-name">CaoxuBlog</span>
+                    <span class="logo-tagline">代码永远在等待一个它从未通过的测试</span>
+                </span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../blog.html">博客</a></li>
+                <li><a href="../tutorial.html">教程</a></li>
+                <li><a href="../about.html">关于我</a></li>
+                <li>
+                    <button class="theme-toggle" type="button" aria-label="切换主题">
+                        <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                        <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="static-article-page">
+        <article class="blog-article">
+            <div class="article-header">
+                <a class="back-btn" href="../blog.html">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    返回博客列表
+                </a>
+                <h1 class="article-title">CSS Grid 布局完全指南</h1>
+                <div class="article-meta">
+                    <span>创建：2026-08-01 09:00</span>
+                    <span>修改：2026-08-05 21:55</span>
+                    
+                    <span class="article-tag">CSS</span><span class="article-tag">前端</span>
+                </div>
+            </div>
+            <nav class="toc" id="articleToc" style="display:none;"></nav>
+            <div class="markdown-body"><h2 id="heading-1">CSS Grid 简介</h2>
+<p>CSS Grid Layout 是 CSS 中最强大的布局系统。它是一个二维系统，可以同时处理列和行。</p>
+<h2 id="heading-2">基本概念</h2>
+<h3 id="heading-3">网格容器</h3>
+<p>通过设置 <code>display: grid</code> 来创建一个网格容器：</p>
+<div class="code-block"><div class="code-header"><span class="code-lang">css</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6</div><pre><code class="language-css">.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto;
+    gap: 20px;
+}</code></pre></div></div>
+<h3 id="heading-4">网格项目</h3>
+<p>网格容器的直接子元素会自动成为网格项目。</p>
+<h2 id="heading-5">常用属性</h2>
+<table><tbody><tr><td>属性</td><td>说明</td></tr><tr><td><code>grid-template-columns</code></td><td>定义列轨道</td></tr><tr><td><code>grid-template-rows</code></td><td>定义行轨道</td></tr><tr><td><code>gap</code></td><td>设置网格间距</td></tr><tr><td><code>grid-column</code></td><td>控制项目跨列</td></tr><tr><td><code>grid-row</code></td><td>控制项目跨行</td></tr></tbody></table>
+<h2 id="heading-6">实战示例</h2>
+<h3 id="heading-7">博客卡片布局</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">css</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5</div><pre><code class="language-css">.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}</code></pre></div></div>
+<p>使用 <code>auto-fill</code> 和 <code>minmax()</code> 可以自动适配不同屏幕尺寸，无需编写媒体查询。</p>
+<h2 id="heading-8">总结</h2>
+<p>CSS Grid 是现代 Web 布局的基石，掌握它可以大大提升布局效率和灵活性。</p></div>
+            <div class="post-nav"><a class="post-nav-link prev" href="blog-4.html"><span class="nav-dir">上一篇</span><span class="nav-title">前端性能优化实用技巧</span></a><a class="post-nav-link next" href="blog-1.html"><span class="nav-dir">下一篇</span><span class="nav-title">使用纯HTML/CSS/JS构建一个完整的静态博客</span></a></div>
+            <p class="article-comment-link"><a href="../blog.html?id=blog-2">参与评论（互动版）→</a></p>
+        </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <script src="../js/data.js?v=20260809"></script>
+    <script src="../js/utils.js?v=20260809"></script>
+    <script src="../js/theme.js?v=20260809"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.enhanceCodeBlocks) enhanceCodeBlocks(document.body);
+            if (window.buildToc) buildToc(document.body, document.getElementById('articleToc'));
+        });
+    </script>
+</body>
+</html>

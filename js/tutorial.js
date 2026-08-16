@@ -36,6 +36,26 @@ let allTutorials = [];           // 全部教程（含已归档，用于归档�
     }
 })();
 
+// 事件委托：处理点赞 / 上一篇下一篇（去除内联 onclick）
+document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const act = el.dataset.action;
+    if (act === 'like') {
+        onTutorialLike(el.dataset.articleId);
+    } else if (act === 'open-article') {
+        e.preventDefault();
+        openTutorialArticle(el.dataset.articleId);
+        highlightTreeArticle(el.dataset.articleId);
+    }
+});
+
+// 评论提交按钮监听（静态 HTML，去掉内联 onclick）
+(function bindTutorialCommentSubmit() {
+    const btn = document.getElementById('tutorialCommentSubmit');
+    if (btn) btn.addEventListener('click', submitTutorialComment);
+})();
+
 // 过滤掉已归档文章（递归）；文件夹下无可见文章则整体隐藏
 function filterArchivedFromTree(items) {
     const result = [];
@@ -121,6 +141,8 @@ function renderFolderTree(tutorials) {
 
 function toggleFolder(header, children) {
     const isCollapsed = children.classList.contains('collapsed');
+    // 同步 aria-expanded：当前折叠则即将展开（true），反之即将折叠（false）
+    header.setAttribute('aria-expanded', String(isCollapsed));
 
     if (isCollapsed) {
         // 展开：先设高度为 scrollHeight，动画结束后设为 none
@@ -204,13 +226,18 @@ function flattenArticles(items) {
 }
 
 async function openTutorialArticle(articleId) {
-    const article = findArticleById(tutorials, articleId);
+    // 归档文章不在目录树中，需从全量数据中查找（支持归档页深链打开）
+    const article = findArticleById(allTutorials, articleId) || findArticleById(tutorials, articleId);
     if (!article) {
         alert('文章不存在');
         return;
     }
 
     currentTutorialId = articleId;
+
+    // 动态更新页面标题与描述（SEO / 分享预览）
+    document.title = article.name + ' - CaoxuBlog';
+    setMetaDescription('教程：' + article.name);
 
     // 先显示标题和加载提示
     document.getElementById('tutorialContent').innerHTML = `
@@ -244,14 +271,14 @@ async function openTutorialArticle(articleId) {
         let nextHtml = '<span class="nav-placeholder"></span>';
         if (idx > 0) {
             const prev = flat[idx - 1];
-            prevHtml = `<a class="post-nav-link prev" href="tutorial.html" onclick="event.preventDefault(); openTutorialArticle('${prev.id}'); highlightTreeArticle('${prev.id}')">
+            prevHtml = `<a class="post-nav-link prev" href="tutorial.html" data-action="open-article" data-article-id="${prev.id}">
                 <span class="nav-dir">上一篇</span>
                 <span class="nav-title">${escapeHtml(prev.name)}</span>
             </a>`;
         }
         if (idx >= 0 && idx < flat.length - 1) {
             const next = flat[idx + 1];
-            nextHtml = `<a class="post-nav-link next" href="tutorial.html" onclick="event.preventDefault(); openTutorialArticle('${next.id}'); highlightTreeArticle('${next.id}')">
+            nextHtml = `<a class="post-nav-link next" href="tutorial.html" data-action="open-article" data-article-id="${next.id}">
                 <span class="nav-dir">下一篇</span>
                 <span class="nav-title">${escapeHtml(next.name)}</span>
             </a>`;
@@ -261,7 +288,7 @@ async function openTutorialArticle(articleId) {
             <div class="tutorial-article">
                 <h1 class="article-title">${escapeHtml(article.name)}</h1>
                 <div class="article-like-bar">
-                    <button class="like-btn${likeState.liked ? ' liked' : ''}" id="tutorialLikeBtn" onclick="onTutorialLike('${article.id}')" aria-pressed="${likeState.liked}" title="${likeState.liked ? '已点赞' : '点赞'}">
+                    <button class="like-btn${likeState.liked ? ' liked' : ''}" id="tutorialLikeBtn" data-action="like" data-article-id="${article.id}" aria-pressed="${likeState.liked}" title="${likeState.liked ? '已点赞' : '点赞'}">
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                         </svg>
@@ -274,13 +301,16 @@ async function openTutorialArticle(articleId) {
                         阅读 ${viewCount}
                     </span>
                 </div>
+                <nav class="toc" id="tutorialToc" style="display:none;"></nav>
                 <div class="markdown-body">${contentHtml}</div>
                 <div class="post-nav tutorial-post-nav">${prevHtml}${nextHtml}</div>
             </div>
         `;
 
-        // 代码高亮 + 复制按钮
-        enhanceCodeBlocks(document.getElementById('tutorialContent'));
+        // 代码高亮 + 复制按钮 + 文章目录
+        const tutorialRoot = document.getElementById('tutorialContent');
+        enhanceCodeBlocks(tutorialRoot);
+        buildToc(tutorialRoot, document.getElementById('tutorialToc'));
     } catch (e) {
         console.error('正文加载失败:', e);
         document.getElementById('tutorialContent').innerHTML = `

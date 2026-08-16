@@ -53,9 +53,9 @@ function renderTagFilter() {
     if (!container) return;
     const tags = collectTags();
 
-    const tagHtml = [`<button class="tag-chip${activeTag === '' ? ' active' : ''}" data-tag="">全部</button>`]
+    const tagHtml = [`<button class="tag-chip${activeTag === '' ? ' active' : ''}" data-tag="" aria-pressed="${activeTag === ''}">全部</button>`]
         .concat(tags.map(t => `
-            <button class="tag-chip${activeTag === t ? ' active' : ''}" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</button>
+            <button class="tag-chip${activeTag === t ? ' active' : ''}" data-tag="${escapeHtml(t)}" aria-pressed="${activeTag === t}">${escapeHtml(t)}</button>
         `)).join('');
 
     container.innerHTML = tagHtml;
@@ -122,7 +122,7 @@ function renderBlogList() {
         const excerpt = blog.excerpt || '';
         return `
             <div class="blog-card${blog.pinned ? ' pinned' : ''}">
-                <a class="card-info" href="blog.html?id=${encodeURIComponent(blog.id)}" onclick="event.preventDefault(); openBlogDetail('${blog.id}')">
+                <a class="card-info" href="blog.html?id=${encodeURIComponent(blog.id)}" data-blog-id="${blog.id}">
                     ${blog.pinned ? `
                     <div class="pin-badge">
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -160,7 +160,7 @@ function renderBlogList() {
         } else {
             let pages = '';
             for (let p = 1; p <= totalPages; p++) {
-                pages += `<button class="page-btn${p === currentPage ? ' active' : ''}" data-page="${p}">${p}</button>`;
+                pages += `<button class="page-btn${p === currentPage ? ' active' : ''}" data-page="${p}" aria-label="第 ${p} 页"${p === currentPage ? ' aria-current="page"' : ''}>${p}</button>`;
             }
             pagination.innerHTML = pages;
             pagination.querySelectorAll('.page-btn').forEach(btn => {
@@ -191,6 +191,10 @@ async function openBlogDetail(blogId, push = true) {
 
     document.getElementById('blogDetail').style.display = 'block';
     document.getElementById('commentSidebar').style.display = 'block';
+
+    // 动态更新页面标题与描述（SEO / 分享预览）
+    document.title = blog.title + ' - CaoxuBlog';
+    setMetaDescription(blog.excerpt || blog.title);
 
     // 更新 URL 参数（pushState 压栈以支持后退，replaceState 仅替换）
     const url = 'blog.html?id=' + blogId;
@@ -235,6 +239,8 @@ function closeBlogDetail(push = true) {
     currentBlogId = null;
     document.getElementById('blogDetail').style.display = 'none';
     document.getElementById('commentSidebar').style.display = 'none';
+    document.title = 'CaoxuBlog - 博客';
+    setMetaDescription('CaoxuBlog 博客文章列表，包含测试技术与前端开发经验分享');
     if (push) {
         history.pushState({}, '', 'blog.html');
     } else {
@@ -252,6 +258,31 @@ window.addEventListener('popstate', () => {
         closeBlogDetail(false);
     }
 });
+
+// 事件委托：统一处理列表卡片 / 上一篇下一篇 / 返回列表 / 点赞（去除内联 onclick）
+document.addEventListener('click', (e) => {
+    const actionEl = e.target.closest('[data-action]');
+    if (actionEl) {
+        const act = actionEl.dataset.action;
+        if (act === 'back-to-list') {
+            closeBlogDetail();
+        } else if (act === 'like') {
+            onBlogLike(actionEl.dataset.blogId);
+        }
+        return;
+    }
+    const blogLink = e.target.closest('[data-blog-id]');
+    if (blogLink) {
+        e.preventDefault();
+        openBlogDetail(blogLink.dataset.blogId);
+    }
+});
+
+// 评论提交按钮（静态 HTML，去掉内联 onclick 改用监听）
+(function bindCommentSubmit() {
+    const btn = document.getElementById('blogCommentSubmit');
+    if (btn) btn.addEventListener('click', submitComment);
+})();
 
 // 本会话内每篇文章只计一次阅读量（首次打开时 +1，之后返回缓存值）
 function getViewCountOnce(blogId) {
@@ -278,14 +309,14 @@ function renderBlogDetail(blog, loading) {
         const idx = blogs.findIndex(b => b.id === blog.id);
         if (idx > 0) {
             const prev = blogs[idx - 1];
-            prevHtml = `<a class="post-nav-link prev" href="blog.html?id=${encodeURIComponent(prev.id)}" onclick="event.preventDefault(); openBlogDetail('${prev.id}')">
+            prevHtml = `<a class="post-nav-link prev" href="blog.html?id=${encodeURIComponent(prev.id)}" data-blog-id="${prev.id}">
                 <span class="nav-dir">上一篇</span>
                 <span class="nav-title">${escapeHtml(prev.title)}</span>
             </a>`;
         }
         if (idx >= 0 && idx < blogs.length - 1) {
             const next = blogs[idx + 1];
-            nextHtml = `<a class="post-nav-link next" href="blog.html?id=${encodeURIComponent(next.id)}" onclick="event.preventDefault(); openBlogDetail('${next.id}')">
+            nextHtml = `<a class="post-nav-link next" href="blog.html?id=${encodeURIComponent(next.id)}" data-blog-id="${next.id}">
                 <span class="nav-dir">下一篇</span>
                 <span class="nav-title">${escapeHtml(next.title)}</span>
             </a>`;
@@ -294,7 +325,7 @@ function renderBlogDetail(blog, loading) {
 
     document.getElementById('blogArticleContent').innerHTML = `
         <div class="article-header">
-            <button class="back-btn" onclick="closeBlogDetail()">
+            <button class="back-btn" data-action="back-to-list">
                 <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="15 18 9 12 15 6"/>
                 </svg>
@@ -329,7 +360,7 @@ function renderBlogDetail(blog, loading) {
                     已置顶
                 </span>
                 ` : ''}
-                <button class="like-btn${likeState.liked ? ' liked' : ''}" id="blogLikeBtn" onclick="onBlogLike('${blog.id}')" aria-pressed="${likeState.liked}" title="${likeState.liked ? '已点赞' : '点赞'}">
+                <button class="like-btn${likeState.liked ? ' liked' : ''}" id="blogLikeBtn" data-action="like" data-blog-id="${blog.id}" aria-pressed="${likeState.liked}" title="${likeState.liked ? '已点赞' : '点赞'}">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                     </svg>
@@ -337,14 +368,16 @@ function renderBlogDetail(blog, loading) {
                 </button>
             </div>
         </div>
+        <nav class="toc" id="articleToc" style="display:none;"></nav>
         <div class="markdown-body">${contentHtml}</div>
         <div class="post-nav">${prevHtml}${nextHtml}</div>
     `;
 
     if (!loading) {
-        // 代码高亮 + 复制按钮
+        // 代码高亮 + 复制按钮 + 文章目录
         const root = document.getElementById('blogArticleContent');
         enhanceCodeBlocks(root);
+        buildToc(root, document.getElementById('articleToc'));
     }
 }
 

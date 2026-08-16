@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="CaoxuBlog 博客文章列表，包含前端技术分享和开发经验总结">
     <title>CaoxuBlog - 博客</title>
-    <link rel="stylesheet" href="css/style.css?v=20260808">
-    <link rel="stylesheet" href="css/blog.css?v=20260808">
-    <link rel="stylesheet" href="css/mouse-trail.css?v=20260808">
+    <link rel="stylesheet" href="css/style.css?v=20260809">
+    <link rel="stylesheet" href="css/blog.css?v=20260809">
+    <link rel="stylesheet" href="css/mouse-trail.css?v=20260809">
 </head>
 <body>
     <!-- 导航栏 -->
@@ -29,13 +29,13 @@
                 <li><a href="about.html">关于我</a></li>
                 <li>
                     <button class="theme-toggle" type="button" aria-label="切换主题">
-                        <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg class="icon icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
                             <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
                             <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
                             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
                         </svg>
-                        <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg class="icon icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                         </svg>
                     </button>
@@ -99,7 +99,7 @@
             <div class="comment-form">
                 <input type="text" id="commentNickname" placeholder="昵称（选填）" maxlength="20" aria-label="昵称">
                 <textarea id="commentContent" placeholder="写下你的评论..." rows="3" aria-label="评论内容"></textarea>
-                <button class="btn-primary" onclick="submitComment()">发表评论</button>
+                <button class="btn-primary" id="blogCommentSubmit">发表评论</button>
             </div>
         </aside>
     </main>
@@ -112,11 +112,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-dark" disabled>
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
 
-    <script src="js/data.js?v=20260808"></script>
-    <script src="js/utils.js?v=20260808"></script>
-    <script src="js/theme.js?v=20260808"></script>
-    <script src="js/mouse-trail.js?v=20260808"></script>
-    <script src="js/waline.js?v=20260808"></script>
-    <script src="js/blog.js?v=20260808"></script>
+    <script src="js/data.js?v=20260809"></script>
+    <script src="js/utils.js?v=20260809"></script>
+    <script src="js/theme.js?v=20260809"></script>
+    <script src="js/mouse-trail.js?v=20260809"></script>
+    <script src="js/waline.js?v=20260809"></script>
+    <script src="js/blog.js?v=20260809"></script>
 </body>
 </html>

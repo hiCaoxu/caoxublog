@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>CaoxuBlog</title>
+    <link>https://hiCaoxu.github.io/caoxublog/</link>
+    <description>CaoxuBlog - 测试技术与前端开发经验分享</description>
+    <item>
+      <title>Git 工作流最佳实践</title>
+      <link>https://hiCaoxu.github.io/caoxublog/post/blog-5.html</link>
+      <description>介绍 Git 工作流的最佳实践，包括分支管理策略和提交信息规范。</description>
+      <pubDate>Tue, 04 Aug 2026 14:00:00 GMT</pubDate>
+      <guid>https://hiCaoxu.github.io/caoxublog/post/blog-5.html</guid>
+    </item>
+    <item>
+      <title>前端性能优化实用技巧</title>
+      <link>https://hiCaoxu.github.io/caoxublog/post/blog-4.html</link>
+      <description>分享前端性能优化的实用技巧，包括图片优化、代码分割、缓存策略等关键手段。</description>
+      <pubDate>Tue, 04 Aug 2026 00:30:00 GMT</pubDate>
+      <guid>https://hiCaoxu.github.io/caoxublog/post/blog-4.html</guid>
+    </item>
+    <item>
+      <title>CSS Grid 布局完全指南</title>
+      <link>https://hiCaoxu.github.io/caoxublog/post/blog-2.html</link>
+      <description>深入理解 CSS Grid 布局系统，从基本概念到实战应用，掌握现代 Web 布局的核心技术。</description>
+      <pubDate>Sat, 01 Aug 2026 01:00:00 GMT</pubDate>
+      <guid>https://hiCaoxu.github.io/caoxublog/post/blog-2.html</guid>
+    </item>
+    <item>
+      <title>使用纯HTML/CSS/JS构建一个完整的静态博客</title>
+      <link>https://hiCaoxu.github.io/caoxublog/post/blog-1.html</link>
+      <description>使用纯前端技术栈构建一个功能完整的静态博客系统，无需任何框架和构建工具。</description>
+      <pubDate>Thu, 30 Jul 2026 02:00:00 GMT</pubDate>
+      <guid>https://hiCaoxu.github.io/caoxublog/post/blog-1.html</guid>
+    </item>
+  </channel>
+</rss>

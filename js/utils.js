@@ -34,7 +34,7 @@ function renderMarkdown(text) {
         const safe = sanitizeUrl(url);
         const altHtml = escapeHtml(alt);
         return safe
-            ? `<img src="${escapeHtml(safe)}" alt="${altHtml}">`
+            ? `<img src="${escapeHtml(safe)}" alt="${altHtml}" loading="lazy">`
             : `<span class="blocked-image">[不安全的图片地址，已拦截]</span>`;
     });
     text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
@@ -57,6 +57,7 @@ function renderMarkdown(text) {
     let blockquoteLines = [];  // 引用行缓存
     let tableRows = [];        // 表格行缓存
     let listState = null;      // { type: 'ul'|'ol', items: [] }
+    let headingCount = 0;      // 标题锚点自增序号
 
     function flushParagraph() {
         if (paragraphLines.length > 0) {
@@ -134,7 +135,8 @@ function renderMarkdown(text) {
         if (headingMatch) {
             flushAll();
             const level = headingMatch[1].length;
-            output.push(`<h${level}>${headingMatch[2]}</h${level}>`);
+            headingCount += 1;
+            output.push(`<h${level} id="heading-${headingCount}">${headingMatch[2]}</h${level}>`);
             continue;
         }
 
@@ -461,6 +463,40 @@ function fallbackCopy(text, done) {
     document.body.removeChild(ta);
 }
 
+/**
+ * 根据正文标题生成文章目录（TOC）。
+ * 依赖 renderMarkdown 已为标题添加 id（heading-N）。
+ * @param {HTMLElement} contentRoot 包含 .markdown-body 的容器
+ * @param {HTMLElement} tocEl 目录容器（<nav class="toc">）
+ */
+function buildToc(contentRoot, tocEl) {
+    if (!contentRoot || !tocEl) return;
+    const headings = contentRoot.querySelectorAll('.markdown-body h1, .markdown-body h2, .markdown-body h3');
+    if (headings.length < 2) {
+        tocEl.style.display = 'none';
+        return;
+    }
+    const items = Array.from(headings).map((h, i) => {
+        if (!h.id) h.id = 'heading-' + (i + 1);
+        return { level: parseInt(h.tagName[1], 10), id: h.id, text: h.textContent };
+    });
+    tocEl.innerHTML =
+        '<div class="toc-title">目录</div>' +
+        '<ul class="toc-list">' +
+        items.map(it => `<li class="toc-item toc-l${it.level}"><a href="#${it.id}">${escapeHtml(it.text)}</a></li>`).join('') +
+        '</ul>';
+    tocEl.style.display = 'block';
+}
+
+/**
+ * 动态更新页面 meta description（SEO / 分享预览）
+ * @param {string} text
+ */
+function setMetaDescription(text) {
+    const el = document.querySelector('meta[name="description"]');
+    if (el && text) el.setAttribute('content', text);
+}
+
 // 兼容 Node.js 测试环境（浏览器中 module 未定义，不影响原有行为）
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -472,6 +508,8 @@ if (typeof module !== 'undefined' && module.exports) {
         formatTime,
         generateId,
         filterSensitiveWords,
+        buildToc,
+        setMetaDescription,
         SENSITIVE_WORDS
     };
 }

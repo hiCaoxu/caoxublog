@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="DOM 操作基础">
+    <title>DOM 操作基础 - CaoxuBlog</title>
+    <link rel="canonical" href="https://hiCaoxu.github.io/caoxublog/post/tut-2-2.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="DOM 操作基础">
+    <meta property="og:description" content="DOM 操作基础">
+    <meta property="og:url" content="https://hiCaoxu.github.io/caoxublog/post/tut-2-2.html">
+    <link rel="stylesheet" href="../css/style.css?v=20260809">
+    <link rel="stylesheet" href="../css/blog.css?v=20260809">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css" id="hljs-light">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-dark" disabled>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="logo-text">
+                    <span class="logo-name">CaoxuBlog</span>
+                    <span class="logo-tagline">代码永远在等待一个它从未通过的测试</span>
+                </span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../blog.html">博客</a></li>
+                <li><a href="../tutorial.html">教程</a></li>
+                <li><a href="../about.html">关于我</a></li>
+                <li>
+                    <button class="theme-toggle" type="button" aria-label="切换主题">
+                        <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                        <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="static-article-page">
+        <article class="blog-article">
+            <div class="article-header">
+                <a class="back-btn" href="../tutorial.html">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    返回教程目录
+                </a>
+                <h1 class="article-title">DOM 操作基础</h1>
+                <div class="article-meta">
+                    
+                    
+                    <span class="article-breadcrumb">JavaScript</span>
+                    
+                </div>
+            </div>
+            <nav class="toc" id="articleToc" style="display:none;"></nav>
+            <div class="markdown-body"><h1 id="heading-1">DOM 操作基础</h1>
+<h2 id="heading-2">什么是 DOM？</h2>
+<p>DOM（Document Object Model）是 HTML 文档的编程接口，它将文档表示为节点树。</p>
+<h2 id="heading-3">选择元素</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">javascript</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6
+7
+8
+9</div><pre><code class="language-javascript">// 通过 ID
+const header = document.getElementById(&#039;header&#039;);
+
+// 通过选择器
+const card = document.querySelector(&#039;.card&#039;);
+const cards = document.querySelectorAll(&#039;.card&#039;);
+
+// 通过类名
+const items = document.getElementsByClassName(&#039;item&#039;);</code></pre></div></div>
+<h2 id="heading-4">操作内容</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">javascript</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6
+7
+8</div><pre><code class="language-javascript">// 文本内容
+element.textContent = &#039;新的文本&#039;;
+
+// HTML 内容
+element.innerHTML = &#039;&lt;strong&gt;加粗文字&lt;/strong&gt;&#039;;
+
+// 表单值
+input.value = &#039;默认值&#039;;</code></pre></div></div>
+<h2 id="heading-5">修改样式</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">javascript</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6
+7
+8
+9</div><pre><code class="language-javascript">// 直接修改
+element.style.color = &#039;#333&#039;;
+element.style.display = &#039;none&#039;;
+
+// 类名操作
+element.classList.add(&#039;active&#039;);
+element.classList.remove(&#039;hidden&#039;);
+element.classList.toggle(&#039;dark&#039;);
+element.classList.contains(&#039;active&#039;);</code></pre></div></div>
+<h2 id="heading-6">创建和删除元素</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">javascript</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</div><pre><code class="language-javascript">// 创建
+const div = document.createElement(&#039;div&#039;);
+div.className = &#039;new-card&#039;;
+div.textContent = &#039;新卡片&#039;;
+
+// 插入
+parent.appendChild(div);
+parent.insertBefore(div, referenceNode);
+
+// 删除
+element.remove();
+parent.removeChild(element);</code></pre></div></div>
+<h2 id="heading-7">事件处理</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">javascript</span><button class="code-copy-btn" type="button">复制</button></div><div class="code-body"><div class="code-lines">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</div><pre><code class="language-javascript">// 添加事件
+button.addEventListener(&#039;click&#039;, (e) =&gt; {
+    console.log(&#039;点击了按钮&#039;, e.target);
+});
+
+// 事件委托
+list.addEventListener(&#039;click&#039;, (e) =&gt; {
+    if (e.target.matches(&#039;.item&#039;)) {
+        console.log(&#039;点击了列表项&#039;);
+    }
+});</code></pre></div></div>
+<h2 id="heading-8">总结</h2>
+<p>DOM 操作是前端开发的基石，虽然现代框架封装了这些操作，但理解底层原理仍然非常重要。</p></div>
+            <div class="post-nav"><a class="post-nav-link prev" href="tut-2-1-2.html"><span class="nav-dir">上一篇</span><span class="nav-title">解构赋值与展开运算符</span></a><span class="nav-placeholder"></span></div>
+            <p class="article-comment-link"><a href="../tutorial.html?id=tut-2-2">参与评论（互动版）→</a></p>
+        </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <script src="../js/data.js?v=20260809"></script>
+    <script src="../js/utils.js?v=20260809"></script>
+    <script src="../js/theme.js?v=20260809"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.enhanceCodeBlocks) enhanceCodeBlocks(document.body);
+            if (window.buildToc) buildToc(document.body, document.getElementById('articleToc'));
+        });
+    </script>
+</body>
+</html>

@@ -135,9 +135,9 @@ test('renderMarkdown: 链接 URL 内含引号不会逃逸出属性', () => {
     assert.doesNotMatch(html, /href=/);
 });
 
-test('renderMarkdown: 安全图片正常渲染', () => {
+test('renderMarkdown: 安全图片正常渲染（含懒加载）', () => {
     const html = renderMarkdown('![封面](https://example.com/cover.png)');
-    assert.match(html, /<img src="https:\/\/example\.com\/cover\.png" alt="封面">/);
+    assert.match(html, /<img src="https:\/\/example\.com\/cover\.png" alt="封面" loading="lazy">/);
 });
 
 test('renderMarkdown: 危险协议图片被拦截且不输出 src', () => {
@@ -173,12 +173,19 @@ test('renderMarkdown: 标题/列表/引用/表格正常渲染', () => {
         '| a | b |'
     ].join('\n');
     const html = renderMarkdown(md);
-    assert.match(html, /<h1>标题一<\/h1>/);
+    assert.match(html, /<h1 id="heading-1">标题一<\/h1>/);
     assert.match(html, /<ul><li>条目 A<\/li><li>条目 B<\/li><\/ul>/);
     assert.match(html, /<blockquote>引用内容<\/blockquote>/);
     assert.match(html, /<table>/);
     // 注：当前渲染器把首行（表头）也渲染为 <td> 放入 <tbody>，此为既有行为
     assert.match(html, /<td>列1<\/td>/);
+});
+
+test('renderMarkdown: 标题生成自增锚点 id', () => {
+    const html = renderMarkdown('# 一\n\n## 二\n\n### 三');
+    assert.match(html, /<h1 id="heading-1">一<\/h1>/);
+    assert.match(html, /<h2 id="heading-2">二<\/h2>/);
+    assert.match(html, /<h3 id="heading-3">三<\/h3>/);
 });
 
 test('renderMarkdown: 代码块与行内代码正常渲染（CRLF 兼容回归）', () => {
