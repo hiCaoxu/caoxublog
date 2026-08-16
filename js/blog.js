@@ -10,6 +10,7 @@ let activeTag = '';              // 当前选中的标签（'' 表示全部）
 let searchKeyword = '';          // 当前搜索关键词
 let currentPage = 1;             // 当前分页
 const PAGE_SIZE = 10;            // 每页显示数量
+const sessionViewed = {};        // 本会话已计阅读量的文章（避免前进/后退重复计数）
 
 (async function () {
     try {
@@ -29,7 +30,7 @@ const PAGE_SIZE = 10;            // 每页显示数量
         const params = new URLSearchParams(window.location.search);
         const blogId = params.get('id');
         if (blogId) {
-            openBlogDetail(blogId);
+            openBlogDetail(blogId, false);
         }
     } catch (e) {
         console.error('博客加载失败:', e);
@@ -175,7 +176,10 @@ function renderBlogList() {
     }
 }
 
-async function openBlogDetail(blogId) {
+// 打开博客详情
+// push=true：用户主动点击（列表/上一篇下一篇），压入历史栈，支持浏览器后退回到列表
+// push=false：初始化深链打开或前进/后退回放，仅替换当前历史状态
+async function openBlogDetail(blogId, push = true) {
     // 归档文章不在列表中，需从全量数据中查找（支持归档页深链打开）
     const blog = allBlogs.find(b => b.id === blogId) || blogs.find(b => b.id === blogId);
     if (!blog) {
@@ -188,8 +192,13 @@ async function openBlogDetail(blogId) {
     document.getElementById('blogDetail').style.display = 'block';
     document.getElementById('commentSidebar').style.display = 'block';
 
-    // 更新 URL 参数
-    history.replaceState({}, '', 'blog.html?id=' + blogId);
+    // 更新 URL 参数（pushState 压栈以支持后退，replaceState 仅替换）
+    const url = 'blog.html?id=' + blogId;
+    if (push) {
+        history.pushState({ blog: blogId }, '', url);
+    } else {
+        history.replaceState({ blog: blogId }, '', url);
+    }
 
     // 移动端滚动到详情区域
     if (window.innerWidth <= 1024) {
@@ -219,12 +228,38 @@ async function openBlogDetail(blogId) {
     }
 }
 
-function closeBlogDetail() {
+// 关闭详情回到列表
+// push=true：用户点击「返回列表」，压入列表历史
+// push=false：前进/后退回放时仅替换状态
+function closeBlogDetail(push = true) {
     currentBlogId = null;
     document.getElementById('blogDetail').style.display = 'none';
     document.getElementById('commentSidebar').style.display = 'none';
-    // 清除 URL 参数
-    history.replaceState({}, '', 'blog.html');
+    if (push) {
+        history.pushState({}, '', 'blog.html');
+    } else {
+        history.replaceState({}, '', 'blog.html');
+    }
+}
+
+// 浏览器前进/后退时同步 UI 与 URL
+window.addEventListener('popstate', () => {
+    const params = new URLSearchParams(window.location.search);
+    const blogId = params.get('id');
+    if (blogId) {
+        openBlogDetail(blogId, false);
+    } else {
+        closeBlogDetail(false);
+    }
+});
+
+// 本会话内每篇文章只计一次阅读量（首次打开时 +1，之后返回缓存值）
+function getViewCountOnce(blogId) {
+    if (!sessionViewed[blogId]) {
+        sessionViewed[blogId] = true;
+        return incrementViewCount(blogId);
+    }
+    return getViewCount(blogId);
 }
 
 function renderBlogDetail(blog, loading) {
@@ -232,8 +267,8 @@ function renderBlogDetail(blog, loading) {
         ? '<p class="comment-empty">加载中...</p>'
         : renderMarkdown(blog.content);
 
-    // 阅读量 +1（本机累计，初始 0）
-    const viewCount = loading ? 0 : incrementViewCount(blog.id);
+    // 阅读量 +1（本机累计，初始 0；本会话内每篇只计一次，避免前进/后退重复计数）
+    const viewCount = loading ? 0 : getViewCountOnce(blog.id);
     const likeState = getLikeState(blog.id);
 
     // 上一篇 / 下一篇（基于未归档列表；归档文章不提供导航，避免跳回普通列表）

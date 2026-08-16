@@ -7,7 +7,12 @@
         "createdAt": "2026-07-30 10:00",
         "updatedAt": "2026-08-05 22:25",
         "pinned": true,
-        "archived": false
+        "archived": false,
+        "tags": [
+            "前端",
+            "CSS",
+            "JavaScript"
+        ]
     },
     {
         "id": "blog-2",
@@ -17,7 +22,11 @@
         "createdAt": "2026-08-01 09:00",
         "updatedAt": "2026-08-05 21:55",
         "pinned": true,
-        "archived": false
+        "archived": false,
+        "tags": [
+            "CSS",
+            "前端"
+        ]
     },
     {
         "id": "blog-3",
@@ -27,7 +36,11 @@
         "createdAt": "2026-08-03 11:00",
         "updatedAt": "2026-08-05 21:56",
         "pinned": false,
-        "archived": true
+        "archived": true,
+        "tags": [
+            "JavaScript",
+            "异步编程"
+        ]
     },
     {
         "id": "blog-4",
@@ -37,7 +50,11 @@
         "createdAt": "2026-08-04 08:30",
         "updatedAt": "2026-08-05 21:56",
         "pinned": false,
-        "archived": false
+        "archived": false,
+        "tags": [
+            "前端",
+            "性能优化"
+        ]
     },
     {
         "id": "blog-5",
@@ -47,6 +64,10 @@
         "createdAt": "2026-08-04 22:00",
         "updatedAt": "2026-08-05 21:56",
         "pinned": true,
-        "archived": false
+        "archived": false,
+        "tags": [
+            "Git",
+            "工具"
+        ]
     }
 ]

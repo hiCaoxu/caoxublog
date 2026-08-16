@@ -70,7 +70,8 @@ function buildBlogsIndex() {
             // 修改时间始终跟随文件修改时间
             updatedAt: formatDateTime(stat.mtime),
             pinned: old ? !!old.pinned : false,
-            archived: old ? !!old.archived : false
+            archived: old ? !!old.archived : false,
+            tags: old && Array.isArray(old.tags) ? old.tags : []
         };
     });
 

@@ -27,7 +27,8 @@ async function loadBlogs() {
         createdAt: new Date(item.createdAt.replace(' ', 'T')).getTime(),
         updatedAt: new Date(item.updatedAt.replace(' ', 'T')).getTime(),
         pinned: !!item.pinned,
-        archived: !!item.archived
+        archived: !!item.archived,
+        tags: Array.isArray(item.tags) ? item.tags : []
     }));
     return blogsCache;
 }
