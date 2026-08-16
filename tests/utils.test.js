@@ -12,7 +12,8 @@ const assert = require('node:assert/strict');
 const {
     renderMarkdown,
     sanitizeUrl,
-    decodeHtmlEntities
+    decodeHtmlEntities,
+    stripMarkdown
 } = require('../js/utils.js');
 
 // ============================================
@@ -208,4 +209,37 @@ test('renderMarkdown: 图片与链接的渲染顺序正确', () => {
     const html = renderMarkdown(md);
     assert.match(html, /<img src="https:\/\/example\.com\/a\.png"/);
     assert.match(html, /<a href="https:\/\/example\.com\/b"/);
+});
+
+// ============================================
+// stripMarkdown：Markdown 转纯文本（全文搜索索引）
+// ============================================
+
+test('stripMarkdown: 去除标题/列表/引用/表格等语法标记', () => {
+    const md = '# 标题\n\n- 条目 A\n- 条目 B\n\n> 引用内容\n\n| 列1 | 列2 |\n| --- | --- |\n| a | b |';
+    const text = stripMarkdown(md);
+    assert.match(text, /标题/);
+    assert.match(text, /条目 A/);
+    assert.match(text, /条目 B/);
+    assert.match(text, /引用内容/);
+    assert.doesNotMatch(text, /^#/);
+    assert.doesNotMatch(text, /^\s*[-*+]/);
+});
+
+test('stripMarkdown: 去除代码块、行内代码与强调', () => {
+    const md = '```js\nconst a = 1;\n```\n\n这是 `inline` 代码，以及 **加粗** 和 *斜体*';
+    const text = stripMarkdown(md);
+    assert.doesNotMatch(text, /```/);
+    assert.doesNotMatch(text, /\*\*/);
+    assert.match(text, /inline/);
+    assert.match(text, /加粗/);
+    assert.match(text, /斜体/);
+});
+
+test('stripMarkdown: 链接与图片转为文本', () => {
+    const md = '看[官网](https://example.com)和![图](https://example.com/a.png)';
+    const text = stripMarkdown(md);
+    assert.match(text, /官网/);
+    assert.match(text, /图/);
+    assert.doesNotMatch(text, /https:\/\/example\.com/);
 });

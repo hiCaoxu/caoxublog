@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="CaoxuBlog 教程目录，包含前端基础和 JavaScript 系列教程">
     <title>CaoxuBlog - 教程</title>
-    <link rel="stylesheet" href="css/style.css?v=20260809">
-    <link rel="stylesheet" href="css/tutorial.css?v=20260809">
-    <link rel="stylesheet" href="css/mouse-trail.css?v=20260809">
+    <link rel="stylesheet" href="css/style.css?v=20260810">
+    <link rel="stylesheet" href="css/tutorial.css?v=20260810">
+    <link rel="stylesheet" href="css/mouse-trail.css?v=20260810">
 </head>
 <body>
     <!-- 导航栏 -->
@@ -60,6 +60,10 @@
                     归档
                 </a>
             </h3>
+            <div class="tutorial-search">
+                <input type="text" id="tutorialSearch" placeholder="搜索教程..." aria-label="搜索教程">
+            </div>
+            <div class="tutorial-search-results" id="tutorialSearchResults" hidden></div>
             <div class="folder-tree" id="folderTree"></div>
         </aside>
 
@@ -93,16 +97,15 @@
     <!-- 鼠标移动特效 -->
     <div class="mouse-trail-container" id="mouseTrail"></div>
 
-    <!-- 语法高亮 -->
+    <!-- 语法高亮样式（脚本由 utils.js 按需懒加载） -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css" id="hljs-light">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css" id="hljs-dark" disabled>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
 
-    <script src="js/data.js?v=20260809"></script>
-    <script src="js/utils.js?v=20260809"></script>
-    <script src="js/theme.js?v=20260809"></script>
-    <script src="js/mouse-trail.js?v=20260809"></script>
-    <script src="js/waline.js?v=20260809"></script>
-    <script src="js/tutorial.js?v=20260809"></script>
+    <script src="js/data.js?v=20260810"></script>
+    <script src="js/utils.js?v=20260810"></script>
+    <script src="js/theme.js?v=20260810"></script>
+    <script src="js/mouse-trail.js?v=20260810"></script>
+    <script src="js/waline.js?v=20260810"></script>
+    <script src="js/tutorial.js?v=20260810"></script>
 </body>
 </html>

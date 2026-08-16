@@ -49,6 +49,76 @@
     border-radius: var(--radius-sm);
 }
 
+/* 教程搜索框与结果 */
+.tutorial-search {
+    margin-bottom: 12px;
+}
+
+.tutorial-search input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color var(--transition);
+}
+
+.tutorial-search input:focus {
+    border-color: var(--accent);
+}
+
+.tutorial-search-results {
+    margin-bottom: 12px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.tutorial-search-results[hidden] {
+    display: none;
+}
+
+.tutorial-search-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    transition: all var(--transition);
+}
+
+.tutorial-search-item:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.tutorial-search-item .tsi-name {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tutorial-search-item .tsi-path {
+    margin-left: auto;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.search-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    padding: 16px 8px;
+}
+
 /* 文件夹树 */
 .folder-tree {
     font-size: 0.875rem;

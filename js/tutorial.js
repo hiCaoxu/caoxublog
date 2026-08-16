@@ -5,6 +5,8 @@
 let currentTutorialId = null;
 let tutorials = [];              // 未归档教程（目录树/导航使用）
 let allTutorials = [];           // 全部教程（含已归档，用于归档页深链打开）
+let tutorialSearchItems = null;  // 教程全文搜索索引（懒加载）
+const MAX_TUTORIAL_COMMENTS = 200; // 单篇文章评论上限
 
 (async function () {
     try {
@@ -13,6 +15,15 @@ let allTutorials = [];           // 全部教程（含已归档，用于归档�
         // 目录树只展示未归档教程；已归档内容仅在归档页（archive.html）展示
         tutorials = filterArchivedFromTree(allTutorials);
         renderFolderTree(tutorials);
+
+        // 懒加载教程全文搜索索引（失败则搜索功能回退为不可用）
+        try {
+            const index = await loadSearchIndex();
+            tutorialSearchItems = index.tutorials || [];
+        } catch (e) {
+            tutorialSearchItems = null;
+        }
+        bindTutorialSearch();
 
         // 优先打开 URL 指定的文章（可能已归档，从全量数据查找）
         const params = new URLSearchParams(window.location.search);
@@ -36,7 +47,40 @@ let allTutorials = [];           // 全部教程（含已归档，用于归档�
     }
 })();
 
-// 事件委托：处理点赞 / 上一篇下一篇（去除内联 onclick）
+// 教程搜索：按名称 / 文件夹路径 / 正文纯文本匹配
+function bindTutorialSearch() {
+    const input = document.getElementById('tutorialSearch');
+    const results = document.getElementById('tutorialSearchResults');
+    const tree = document.getElementById('folderTree');
+    if (!input || !results || !tree) return;
+
+    input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        if (!q) {
+            results.hidden = true;
+            results.innerHTML = '';
+            tree.style.display = '';
+            return;
+        }
+        const items = (tutorialSearchItems || []).filter(a =>
+            (a.name || '').toLowerCase().includes(q) ||
+            (a.folderPath || '').toLowerCase().includes(q) ||
+            (a.text || '').includes(q)
+        );
+        tree.style.display = 'none';
+        results.hidden = false;
+        results.innerHTML = items.length === 0
+            ? '<p class="search-empty">无匹配结果</p>'
+            : items.map(a => `
+                <a class="tutorial-search-item" href="#" data-action="open-article" data-article-id="${escapeHtml(a.id)}">
+                    <span class="tsi-name">${escapeHtml(a.name)}</span>
+                    ${a.folderPath ? `<span class="tsi-path">${escapeHtml(a.folderPath)}</span>` : ''}
+                </a>
+            `).join('');
+    });
+}
+
+// 事件委托：处理点赞 / 上一篇下一篇 / 搜索结果点击（去除内联 onclick）
 document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-action]');
     if (!el) return;
@@ -47,6 +91,12 @@ document.addEventListener('click', (e) => {
         e.preventDefault();
         openTutorialArticle(el.dataset.articleId);
         highlightTreeArticle(el.dataset.articleId);
+        // 若来自搜索结果，打开后清空搜索、恢复目录树
+        const si = document.getElementById('tutorialSearch');
+        if (si && si.value) {
+            si.value = '';
+            si.dispatchEvent(new Event('input'));
+        }
     }
 });
 
@@ -387,6 +437,11 @@ function submitTutorialComment() {
     const allComments = loadTutorialComments();
     if (!allComments[currentTutorialId]) {
         allComments[currentTutorialId] = [];
+    }
+
+    // 单篇评论条数上限：超限时移除最旧的一条，防止 localStorage 写满
+    if (allComments[currentTutorialId].length >= MAX_TUTORIAL_COMMENTS) {
+        allComments[currentTutorialId].shift();
     }
 
     allComments[currentTutorialId].push({

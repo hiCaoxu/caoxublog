@@ -411,19 +411,25 @@ function filterSensitiveWords(text) {
 /**
  * 代码块增强：语法高亮 + 复制按钮
  * 在 Markdown 渲染注入 DOM 后调用，传入容器元素。
- * 依赖 highlight.js（全局 window.hljs），若未加载则跳过高亮只绑定复制。
+ * highlight.js 按需懒加载：仅当存在代码块时才从 CDN 加载（避免全站首屏下载数百 KB）。
  * @param {HTMLElement} root
  */
 function enhanceCodeBlocks(root) {
     if (!root) return;
 
-    // 语法高亮
-    if (window.hljs) {
-        root.querySelectorAll('.code-block pre code').forEach(block => {
-            try {
-                window.hljs.highlightElement(block);
-            } catch (e) { /* 忽略单块高亮失败 */ }
+    const codeEls = root.querySelectorAll('.code-block pre code');
+
+    // 语法高亮（highlight.js 已加载则立即高亮，否则按需加载后再高亮）
+    const highlightAll = () => {
+        if (!window.hljs) return;
+        codeEls.forEach(block => {
+            try { window.hljs.highlightElement(block); } catch (e) { /* 忽略单块高亮失败 */ }
         });
+    };
+    if (window.hljs) {
+        highlightAll();
+    } else if (codeEls.length > 0) {
+        loadHighlightJs().then(highlightAll).catch(() => { /* 高亮加载失败则跳过 */ });
     }
 
     // 复制按钮
@@ -449,6 +455,47 @@ function enhanceCodeBlocks(root) {
             }
         });
     });
+}
+
+// highlight.js 脚本懒加载（全局只加载一次）
+let highlightScriptPromise = null;
+function loadHighlightJs() {
+    if (window.hljs) return Promise.resolve();
+    if (!highlightScriptPromise) {
+        highlightScriptPromise = new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js';
+            s.onload = () => resolve();
+            s.onerror = () => reject(new Error('highlight.js 加载失败'));
+            document.head.appendChild(s);
+        });
+    }
+    return highlightScriptPromise;
+}
+
+/**
+ * 将 Markdown 转为纯文本（用于全文搜索索引）。
+ * 去掉代码块、标题标记、强调、链接/图片语法、列表标记等。
+ * @param {string} md
+ * @returns {string}
+ */
+function stripMarkdown(md) {
+    if (!md) return '';
+    return String(md)
+        .replace(/```[\s\S]*?```/g, ' ')       // 代码块
+        .replace(/`([^`]+)`/g, '$1')           // 行内代码
+        .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1') // 图片 -> alt
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // 链接 -> 文本
+        .replace(/^#{1,6}\s+/gm, '')           // 标题标记
+        .replace(/^\s*>\s?/gm, '')             // 引用标记
+        .replace(/^\s*[-*+]\s+/gm, '')         // 无序列表标记
+        .replace(/^\s*\d+\.\s+/gm, '')         // 有序列表标记
+        .replace(/^\s*\|.*$/gm, ' ')           // 表格行
+        .replace(/\*\*([^*]+)\*\*/g, '$1')     // 加粗
+        .replace(/\*([^*]+)\*/g, '$1')         // 斜体
+        .replace(/~{1,2}([^~]+)~{1,2}/g, '$1') // 删除线
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 // 兼容不支持 Clipboard API 的环境
@@ -510,6 +557,7 @@ if (typeof module !== 'undefined' && module.exports) {
         filterSensitiveWords,
         buildToc,
         setMetaDescription,
+        stripMarkdown,
         SENSITIVE_WORDS
     };
 }

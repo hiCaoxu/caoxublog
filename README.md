@@ -5,15 +5,15 @@
 ## 功能特性
 
 - **首页**：置顶博客区（最多 3 条）+ 最新博客区（按创建时间倒序 6 条，自动排除置顶避免重复）
-- **博客页**：按创建时间倒序排列；支持**关键词搜索**、**标签筛选**与**分页**（每页 10 条）；详情页 Markdown 渲染，展示创建/修改时间、阅读量、点赞，并提供上一篇/下一篇导航；URL 参数（`?id=`）同步，详情页支持浏览器前进/后退（`pushState`/`popstate`）
-- **教程页**：左侧三级目录树（文件夹可折叠，文章按文件名正序），默认打开第一篇并高亮当前文章；右侧评论区
+- **博客页**：按创建时间倒序排列；支持**全文搜索**（标题/摘要/标签/正文）、**标签筛选**与**分页**（每页 10 条）；详情页 Markdown 渲染，展示创建/修改时间、阅读量、点赞，并提供上一篇/下一篇导航；URL 参数（`?id=`）同步，详情页支持浏览器前进/后退（`pushState`/`popstate`）
+- **教程页**：左侧三级目录树（文件夹可折叠，文章按文件名正序）+ 教程全文搜索；默认打开第一篇并高亮当前文章；右侧评论区
 - **归档页**：集中展示已归档内容；博客/教程页均有归档按钮（`archive.html?type=blog|tutorial` 预选 Tab）；归档后文章自动从首页、博客列表、教程目录中隐藏，仅在归档页可见
 - **关于我页**：Markdown 渲染个人信息，内容由根目录 `about.md` 管理，改文件即发布
-- **代码块**：语言标签 + 行号 + 一键复制按钮 + [highlight.js](https://highlightjs.org/) 语法高亮（CDN 引入，亮/暗两套样式随站点主题自动切换）
+- **代码块**：语言标签 + 行号 + 一键复制按钮 + [highlight.js](https://highlightjs.org/) 语法高亮（脚本按需懒加载，仅在存在代码块时引入；亮/暗两套样式随站点主题切换）
 - **文章目录（TOC）**：详情页根据正文标题自动生成可点击目录（带锚点平滑滚动）；正文图片懒加载（`loading="lazy"`）
-- **SEO 友好**：`build-index.js` 生成每篇文章的静态页（`post/*.html`，含 `canonical` / Open Graph）+ `sitemap.xml` / `robots.txt` / `feed.xml`（RSS），正文可被搜索引擎收录；详情页标题与描述随文章动态更新
+- **SEO 友好**：`build-index.js` 生成每篇文章的静态页（`post/*.html`，含 `canonical` / Open Graph）+ `sitemap.xml` / `robots.txt` / `feed.xml`（RSS）+ 全文搜索索引 `search-index.json`，正文可被搜索引擎收录；详情页标题与描述随文章动态更新
 - **主题切换**：暗色 / 亮色一键切换；记忆用户选择，未手动设置时自动跟随系统偏好（`prefers-color-scheme`）
-- **评论系统**：内置本地评论（localStorage 持久化、按文章 ID 隔离、时间正序、敏感词过滤）；可选接入 Waline 获得全网共享评论、点赞与真实阅读量
+- **评论系统**：内置本地评论（localStorage 持久化、按文章 ID 隔离、时间正序、敏感词过滤、单篇条数上限）；可选接入 Waline 获得全网共享评论、点赞与真实阅读量
 - **鼠标特效**：淡绿色半透明光点跟随鼠标、渐变消散；节流渲染、数量上限 100、支持触屏
 - **设计风格**：素雅浅色系 + 暗色主题，黑白配色、简约线性 SVG 图标
 - **响应式**：适配桌面端与移动端，超小屏自动隐藏导航标语，尊重 `prefers-reduced-motion`
@@ -26,12 +26,13 @@
 | 前端 | 原生 HTML5 / CSS3 / JavaScript（ES6+），零框架零依赖 |
 | 内容 | Markdown 文件 + `index.json` 清单，浏览器端 `fetch` 实时加载（`cache: 'no-cache'` 保证发布即时生效） |
 | Markdown 渲染 | 自研行扫描解析器（`js/utils.js`），支持标题、列表、代码块、表格、引用、图片、链接、行内格式 |
-| 代码高亮 | highlight.js 11（jsDelivr CDN），亮/暗双主题随站点主题切换 |
+| 代码高亮 | highlight.js 11（jsDelivr CDN），脚本按需懒加载，亮/暗双主题随站点主题切换 |
 | 主题系统 | CSS 变量 + `<html data-theme>` 属性，localStorage 记忆 + 跟随系统偏好 |
 | 数据持久化 | 评论、点赞、阅读量、主题均存于访客浏览器 localStorage（`safeStorage*` 容错封装） |
 | 评论（可选） | Waline v3（unpkg CDN 按需加载），需自建服务端 |
-| 内容索引生成 | Node.js 脚本 `build-index.js`（零依赖），生成清单 + 静态页 + `sitemap.xml`/`robots.txt`/`feed.xml` |
+| 内容索引生成 | Node.js 脚本 `build-index.js`（零依赖），生成清单 + 静态页 + 搜索索引 + `sitemap.xml`/`robots.txt`/`feed.xml` |
 | 单元测试 | Node 内置 test runner（`node:test`，零第三方依赖） |
+| CI | GitHub Actions（push/PR 触发 `node --test` + `build-index.js` 冒烟） |
 | 部署 | 任意静态服务器（Nginx / COS / EdgeOne Pages / GitHub Pages 等） |
 
 ## 项目结构
@@ -59,6 +60,10 @@ caoxublog/
 ├── sitemap.xml             # 站点地图（自动生成）
 ├── robots.txt              # 爬虫规则（自动生成）
 ├── feed.xml                # RSS 订阅源（自动生成）
+├── search-index.json       # 全文搜索索引（自动生成）
+├── nginx.conf.example      # Nginx 部署示例（含 gzip/缓存/安全头）
+├── .gitignore              # Git 忽略规则
+├── .github/workflows/      # GitHub Actions CI（测试 + build-index 冒烟）
 ├── css/
 │   ├── style.css           # 全局样式（导航/卡片/Markdown/评论区/主题变量/归档按钮）
 │   ├── blog.css            # 博客页布局
@@ -114,7 +119,7 @@ npx serve .
 - 修改：直接编辑 md 文件，运行脚本后 `updatedAt` 自动更新为文件修改时间
 - 删除：删除 md 文件，运行脚本后清单条目自动移除
 
-> 每次运行 `node build-index.js` 都会同步重新生成每篇文章的静态页（`post/*.html`）与 `sitemap.xml` / `robots.txt` / `feed.xml`，并自动清理已删除文章的残留静态页，无需手动维护。
+> 每次运行 `node build-index.js` 都会同步重新生成每篇文章的静态页（`post/*.html`）、全文搜索索引（`search-index.json`）与 `sitemap.xml` / `robots.txt` / `feed.xml`，并自动清理已删除文章的残留静态页，无需手动维护。
 
 ### 关于我页
 
@@ -144,7 +149,7 @@ Markdown 渲染器（含 XSS 协议白名单）与归档数据工具函数使用
 npm test          # 等价于 node --test
 ```
 
-覆盖：协议白名单（http/https/mailto/tel + 站内相对路径）、危险协议拦截（javascript/data/vbscript/file）、HTML 实体与双重编码混淆绕过、属性引号逃逸、标签/alt 文本转义、标题锚点 id 生成、归档过滤（`getActiveBlogs` / `getArchivedBlogs` / `flattenArchivedArticles`），以及标题、列表、引用、表格、代码块（CRLF 兼容）等基础语法回归。
+覆盖：协议白名单（http/https/mailto/tel + 站内相对路径）、危险协议拦截（javascript/data/vbscript/file）、HTML 实体与双重编码混淆绕过、属性引号逃逸、标签/alt 文本转义、标题锚点 id 生成、归档过滤（`getActiveBlogs` / `getArchivedBlogs` / `flattenArchivedArticles`）、Markdown 转纯文本（`stripMarkdown`，全文搜索索引用），以及标题、列表、引用、表格、代码块（CRLF 兼容）等基础语法回归。
 
 ## 评论与统计
 
@@ -189,6 +194,14 @@ const SITE_URL = 'https://hiCaoxu.github.io/caoxublog';
 
 `sitemap.xml`、`robots.txt`、`feed.xml` 以及每篇文章的 `canonical` / `og:url` 都基于它生成**绝对地址**。部署到其他域名时，请把 `SITE_URL` 改成实际站点地址后重新运行脚本。
 
+### Nginx 部署参考
+
+项目根目录提供了 `nginx.conf.example`：包含 gzip 压缩、静态资源缓存策略（带版本号的 JS/CSS 长缓存、页面与数据不缓存）、安全响应头（`X-Content-Type-Options` / `X-Frame-Options` / `Referrer-Policy`，以及可选的 CSP 示例）。部署到 Nginx 时按需修改域名与证书路径即可。
+
+### 持续集成（CI）
+
+`.github/workflows/ci.yml` 在 push / PR 到 `main` 时自动运行 `node --test`（单元测试）与 `node build-index.js`（生成脚本冒烟测试），用于在合并前发现回归。
+
 ### 浏览器缓存
 
 更新代码后访客浏览器可能仍使用缓存的旧版脚本/样式。本站已在所有本地 CSS/JS 引用上加了版本号参数（如 `css/style.css?v=20260806`）：**发布更新后，将 5 个 HTML 页面中的 `?v=` 值递增一次**（可用当天日期），即可强制访客浏览器拉取新版资源；数据清单（`index.json`）本身通过 `fetch` 的 `cache: 'no-cache'` 每次都做新鲜度校验，无需处理。开发者本机调试时，直接 Ctrl+F5 强制刷新即可。
@@ -210,6 +223,7 @@ const SITE_URL = 'https://hiCaoxu.github.io/caoxublog';
 13. **安全加固**：Markdown 渲染器增加 URL 协议白名单（防 XSS）+ 单元测试；补充标签筛选与归档功能
 14. **交互完善**：详情页改用 `pushState`/`popstate` 支持浏览器前进后退；去除内联 `onclick` 改为事件委托；补齐 aria（`aria-current` / `aria-expanded` / `aria-pressed` / `aria-hidden`）
 15. **SEO 与阅读体验**：生成静态文章页 + sitemap/RSS；详情页动态 title/meta；文章目录（TOC）与图片懒加载
+16. **性能与工程化收尾**：highlight.js 改为按需懒加载；新增全文搜索（博客正文 + 教程搜索）；本地评论加条数上限；消除 about.md 双写；补充 `.gitignore`、Nginx 示例、GitHub Actions CI
 
 ## AI 协作说明
 

@@ -10,7 +10,9 @@ let activeTag = '';              // 当前选中的标签（'' 表示全部）
 let searchKeyword = '';          // 当前搜索关键词
 let currentPage = 1;             // 当前分页
 const PAGE_SIZE = 10;            // 每页显示数量
+const MAX_COMMENTS = 200;        // 单篇文章评论上限（防止 localStorage 写满）
 const sessionViewed = {};        // 本会话已计阅读量的文章（避免前进/后退重复计数）
+let searchTextMap = null;        // 全文搜索索引（id -> 纯文本）
 
 (async function () {
     try {
@@ -22,6 +24,14 @@ const sessionViewed = {};        // 本会话已计阅读量的文章（避免�
         blogs.sort((a, b) => b.createdAt - a.createdAt);
 
         filteredBlogs = blogs.slice();
+
+        // 懒加载全文搜索索引（失败则回退到标题/摘要/标签匹配）
+        try {
+            const index = await loadSearchIndex();
+            searchTextMap = new Map((index.blogs || []).map(item => [item.id, item.text || '']));
+        } catch (e) {
+            searchTextMap = null;
+        }
 
         renderTagFilter();
         renderSearchAndList();
@@ -77,7 +87,8 @@ function applyFilterAndRender() {
         const matchKw = kw === '' ||
             b.title.toLowerCase().includes(kw) ||
             (b.excerpt || '').toLowerCase().includes(kw) ||
-            (b.tags || []).some(t => t.toLowerCase().includes(kw));
+            (b.tags || []).some(t => t.toLowerCase().includes(kw)) ||
+            (searchTextMap && (searchTextMap.get(b.id) || '').includes(kw));
         return matchTag && matchKw;
     });
     renderBlogList();
@@ -452,6 +463,11 @@ function submitComment() {
     const allComments = loadComments();
     if (!allComments[currentBlogId]) {
         allComments[currentBlogId] = [];
+    }
+
+    // 单篇评论条数上限：超限时移除最旧的一条，防止 localStorage 写满
+    if (allComments[currentBlogId].length >= MAX_COMMENTS) {
+        allComments[currentBlogId].shift();
     }
 
     allComments[currentBlogId].push({

@@ -64,56 +64,26 @@ async function loadTutorialContent(article) {
 }
 
 // ============================================
-// 关于我数据（默认内容，about.md 加载失败时回退使用）
+// 全文搜索索引（build-index.js 生成的 search-index.json）
+// ============================================
+let searchIndexCache = null;
+
+async function loadSearchIndex() {
+    if (searchIndexCache) return searchIndexCache;
+    const resp = await fetch('search-index.json', { cache: 'no-cache' });
+    if (!resp.ok) throw new Error('搜索索引加载失败');
+    searchIndexCache = await resp.json();
+    return searchIndexCache;
+}
+
+// ============================================
+// 关于我数据（about.md 加载失败时的极简回退，避免与 about.md 双写漂移）
 // 正常情况由 about.js 从根目录 about.md 加载
 // ============================================
 function getDefaultAbout() {
     return `# 关于我
 
-你好！我是 **hicao**，一名测试工程师。
-
-## 个人简介
-
-我深耕软件测试 3-5 年，专注软件质量保障，方向覆盖**接口测试、Web 自动化测试**与**测试开发（质量平台）**。近几年重点关注 **AI 赋能软件测试**，持续探索如何用 AI 提升测试设计效率、自动化覆盖率与缺陷分析质量。
-
-## 技术栈
-
-- **接口测试**：Postman / Apifox，接口自动化与数据校验
-- **Web 自动化**：Selenium / Playwright，UI 自动化与回归测试体系
-- **测试开发**：Python / Pytest，自研测试工具与质量平台、CI 集成
-- **数据库**：MySQL，测试数据构造与结果校验
-- **环境**：Linux / Shell，测试环境搭建与运维脚本
-- **AI 赋能测试**：AI 辅助用例生成、缺陷分析、测试提效实践
-
-## 博客主题
-
-这个博客主要分享以下内容：
-
-1. **测试技术分享**：接口 / 自动化 / 性能测试的实战经验
-2. **工具与效率**：测试工具与开发工具的使用教程
-3. **学习笔记**：读书笔记、课程总结
-4. **职业成长**：测试职业发展路径与面试经验
-
-## 联系方式
-
-- **GitHub**：[github.com/hiCaoxu](https://github.com/hiCaoxu)
-- **邮箱**：hicaoxu@qq.com
-
-## 关于本站
-
-CaoxuBlog 是一个纯静态博客，使用原生 HTML、CSS 和 JavaScript 构建，无需任何框架或构建工具。
-
-技术特点：
-- 博客和教程以 Markdown 文件管理，直接修改文件即可更新内容
-- 支持 Markdown 格式内容渲染（含代码高亮、暗色模式）
-- 响应式设计，适配各种设备
-- 简约线性图标风格、素雅清新的配色方案
-
----
-
-> "Stay hungry, stay foolish." —— Steve Jobs
-
-感谢你的访问！欢迎在博客和教程页面留言交流。`;
+内容加载失败，请刷新页面重试。`;
 }
 
 // ============================================
@@ -334,6 +304,7 @@ if (typeof module !== 'undefined' && module.exports) {
         getLatestBlogs,
         getActiveBlogs,
         getArchivedBlogs,
-        flattenArchivedArticles
+        flattenArchivedArticles,
+        loadSearchIndex
     };
 }

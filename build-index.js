@@ -193,7 +193,7 @@ const utils = require('./js/utils.js');
 // 站点域名（部署后改为实际地址，用于 sitemap / canonical / og 的绝对 URL）
 const SITE_URL = 'https://hiCaoxu.github.io/caoxublog';
 // 静态资源版本号（与各 HTML 页面中的 ?v= 保持一致）
-const ASSET_VERSION = '20260809';
+const ASSET_VERSION = '20260810';
 const POST_DIR = path.join(ROOT, 'post');
 
 // 教程树扁平化：收集文章并携带所属文件夹路径
@@ -305,7 +305,6 @@ function renderArticlePage(article) {
         </article>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
     <script src="../js/data.js?v=${ASSET_VERSION}"></script>
     <script src="../js/utils.js?v=${ASSET_VERSION}"></script>
     <script src="../js/theme.js?v=${ASSET_VERSION}"></script>
@@ -400,11 +399,34 @@ function buildArticlePages() {
     console.log(`静态页已生成：博客 ${blogs.length} 篇，教程 ${tutorialArticles.length} 篇；sitemap.xml / robots.txt / feed.xml 已更新`);
 }
 
+// 生成全文搜索索引（search-index.json），供博客全文搜索与教程搜索使用
+function buildSearchIndex() {
+    const blogs = readJsonSafe(path.join(BLOGS_DIR, 'index.json'), []);
+    const tree = readJsonSafe(path.join(TUTORIALS_DIR, 'index.json'), []);
+    const tuts = flattenTreeArticles(tree);
+
+    const blogItems = blogs.filter(b => !b.archived).map(b => {
+        const md = fs.readFileSync(path.join(BLOGS_DIR, b.file), 'utf8');
+        const text = [b.title, b.excerpt, (b.tags || []).join(' '), utils.stripMarkdown(md)].join(' ').toLowerCase();
+        return { id: b.id, title: b.title, text };
+    });
+
+    const tutItems = tuts.filter(a => !a.archived).map(a => {
+        const md = fs.readFileSync(path.join(TUTORIALS_DIR, a.file), 'utf8');
+        const text = [a.name, a.folderPath || '', utils.stripMarkdown(md)].join(' ').toLowerCase();
+        return { id: a.id, name: a.name, folderPath: a.folderPath || '', text };
+    });
+
+    fs.writeFileSync(path.join(ROOT, 'search-index.json'), JSON.stringify({ blogs: blogItems, tutorials: tutItems }), 'utf8');
+    console.log(`search-index.json 已更新（博客 ${blogItems.length} 篇，教程 ${tutItems.length} 篇）`);
+}
+
 // ============================================
 // 执行
 // ============================================
-console.log('正在生成 index.json 与静态页 ...\n');
+console.log('正在生成 index.json、静态页与搜索索引 ...\n');
 buildBlogsIndex();
 buildTutorialsIndex();
 buildArticlePages();
+buildSearchIndex();
 console.log('\n完成！如有【待填写】占位内容，请编辑对应的 index.json 补充。');

@@ -1,0 +1,49 @@
+# CaoxuBlog - Nginx 示例配置
+# 部署到腾讯云轻量应用服务器等场景时参考，按需修改域名与目录。
+
+server {
+    listen 80;
+    server_name your-domain.com;
+    # 可选：HTTP 自动跳转 HTTPS
+    # return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name your-domain.com;
+
+    # SSL 证书（替换为实际路径）
+    ssl_certificate     /etc/nginx/ssl/your-domain.crt;
+    ssl_certificate_key /etc/nginx/ssl/your-domain.key;
+
+    root /var/www/caoxublog;
+    index index.html;
+
+    # gzip 压缩
+    gzip on;
+    gzip_types text/plain text/css application/javascript application/json application/xml image/svg+xml;
+    gzip_min_length 1024;
+
+    # 安全响应头
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    # CSP：本站已去除内联事件（onclick），可开启较严格的策略；
+    # 若接入 Waline / highlight.js 等 CDN，请把对应域名加入白名单。
+    # add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; img-src 'self' data: https:;" always;
+
+    # 静态资源缓存：带版本号（?v=）的 JS/CSS 可长缓存，页面与数据不缓存
+    location ~* \.(css|js|svg|png|jpg|jpeg|webp|ico)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+    location ~* \.(html|xml|txt|json|md)$ {
+        expires -1;
+        add_header Cache-Control "no-cache";
+    }
+
+    # SPA 深链（blog.html?id= 等）无需 rewrite，静态文件直接命中
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
